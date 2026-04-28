@@ -88,8 +88,7 @@ con `--no-api`.
 
 ## 3. Repositorio
 
-> **URL pública**: `https://github.com/<TU_USUARIO>/scuffers-ai-ops-control-tower`
-> _(rellena tras crear el repo en github.com — instrucciones abajo)._
+> **URL pública**: <https://github.com/xc9000/scuffers-ai-ops-control-tower>
 
 Estructura mínima:
 
@@ -119,8 +118,8 @@ Estructura mínima:
 
 ## 4. Demo en vivo
 
-> **Dashboard público**: `https://<TU_USUARIO>.github.io/scuffers-ai-ops-control-tower/`
-> _(rellena tras activar GitHub Pages — instrucciones abajo)._
+> **Dashboard público**: <https://xc9000.github.io/scuffers-ai-ops-control-tower/>
+> _(disponible 30–60 s después de activar GitHub Pages — instrucciones abajo)._
 
 **Recorrido sugerido (90s)**
 
@@ -135,7 +134,7 @@ Estructura mínima:
 ### Reproducir la demo desde otro ordenador
 
 ```bash
-git clone https://github.com/<TU_USUARIO>/scuffers-ai-ops-control-tower.git
+git clone https://github.com/xc9000/scuffers-ai-ops-control-tower.git
 cd scuffers-ai-ops-control-tower/hackathon_control_tower
 
 # Modo offline (sin API)
@@ -194,38 +193,18 @@ JSON crudo: [`docs/top_actions.json`](./docs/top_actions.json) · Reporte: [`doc
 
 ---
 
-## 7. Cómo dejar repo + dashboard accesibles desde otro PC (5 min)
+## 7. Activar GitHub Pages (30 s)
 
-Tu PC no tiene `gh` CLI ni el proyecto inicializado en git. Dos pasos:
+El repo ya está en `https://github.com/xc9000/scuffers-ai-ops-control-tower`.
+Para servir el dashboard público:
 
-### A. Crear repo en GitHub e inicializar git
-
-1. En `https://github.com/new` crea un repo público llamado
-   `scuffers-ai-ops-control-tower`. **No** marques "Initialize with README".
-2. Desde la raíz del proyecto:
-
-```powershell
-cd "C:\Users\LCS\Projects\scuffers claude"
-git init
-git branch -M main
-git add .
-git commit -m "Scuffers AI Ops Control Tower - entrega hackathon UDIA"
-git remote add origin https://github.com/<TU_USUARIO>/scuffers-ai-ops-control-tower.git
-git push -u origin main
-```
-
-### B. Activar GitHub Pages para el dashboard público
-
-1. Ve a `Settings → Pages` del repo recién creado.
+1. Abre <https://github.com/xc9000/scuffers-ai-ops-control-tower/settings/pages>
 2. **Source**: Deploy from a branch.
 3. **Branch**: `main` · **Folder**: `/docs`. Save.
-4. Tras 30–60 s la URL será:
-   `https://<TU_USUARIO>.github.io/scuffers-ai-ops-control-tower/`
+4. Tras 30–60 s la URL queda en
+   <https://xc9000.github.io/scuffers-ai-ops-control-tower/>
 
-### Alternativa instant (sin GitHub Pages)
+### Alternativa instant (sin esperar a Pages)
 
-Arrastra la carpeta `docs/` a `https://app.netlify.com/drop` y obtienes una
+Arrastra la carpeta `docs/` a <https://app.netlify.com/drop> y obtienes una
 URL pública en menos de 30 segundos. Sirve incluso sin cuenta de Netlify.
-
-Una vez tengas las dos URLs, sustituye los placeholders `<TU_USUARIO>` en las
-secciones 3 y 4 de este documento y haz un nuevo commit.
