@@ -1,110 +1,105 @@
-# Scuffers AI Ops Control Tower — entregable del hackathon
+# Scuffers AI Ops Control Tower — Documentación técnica
 
-Carpeta lista para ejecutar y entregar. Solo Python stdlib, sin dependencias.
+Entregable del reto: pipeline batch en **Python 3, solo stdlib**, diseñado para priorizar decisiones en un drop con datos imperfectos y enriquecimiento opcional vía **Shipping Status API**.
 
-## Resumen ejecutivo (60 segundos)
+---
 
-> En las primeras horas de un drop el problema no es la falta de datos, es la falta de foco. La Control Tower lee los seis CSV reales aunque vengan rotos, los cruza con tolerancia a ruido (SKUs en mayúscula y minúscula, precios `€34,9`, segmentos vacíos), aplica diez detectores de acción y devuelve un top 10 priorizado en el formato exacto del enunciado. Cada acción es interpretable: rescate VIP, pausa de campaña con tiempo real de stockout y coste estimado en EUR, predicción de demanda por analogía con drops anteriores, macro de soporte para tickets repetidos, escalado logístico cuando la API lo justifica. La Shipping Status API se llama solo en los pedidos top y, si cae, el sistema sigue produciendo el top 10 con menor confianza. Dashboard autocontenido, sin servidor; abrir con doble click y se entiende en 30 segundos.
+## Objetivo del producto
 
-## Archivos clave
+Reducir la carga cognitiva del equipo de operaciones en la ventana crítica: en lugar de consumir seis fuentes a la vez, el operador recibe **hasta 10 acciones** con:
 
-- `control_tower.py`: pipeline completo (carga, normalización, scoring, API logística, detectores, salidas).
-- `ENUNCIADO_RESUMIDO.md`: enunciado real reconstruido a partir del bundle de la web.
-- `PLAN_RETO_SCUFFERS.md`: plan estratégico con señales y opciones de solución.
-- `PITCH_Y_DEMO.md`: pitch de 60 s, frases senior, supuestos/limitaciones y respuestas a preguntas difíciles.
-- `outputs_full/`: salida ya generada con los CSVs reales.
+- `priority_score` (0–100) y trazabilidad
+- `confidence` y `valid_for_minutes` (ventana operativa)
+- `owner` (customer_care, marketing, merchandising, operations)
+- Motivo verificable (incl. tiempo a stockout y estimaciones EUR cuando aplica)
 
-## Comandos esenciales
+---
 
-Modo offline (sin la Shipping Status API):
+## Ejecución
 
 ```powershell
+cd hackathon_control_tower
+
+# Producción / revisión sin API (priorización solo con datos internos)
 python control_tower.py --data ..\scuffers_all_mock_data\candidate_csvs --out outputs_full --no-api
+
+# Con Shipping Status API (variable de entorno o flag)
+python control_tower.py --data ..\scuffers_all_mock_data\candidate_csvs --out outputs_full --candidate-id SCF-2026-XXXX --api-top 25
+
+# Banner opcional en el HTML (ej. snapshot público etiquetado como demo)
+python control_tower.py ... --demo-banner "Texto breve para revisores"
 ```
 
-Modo enriquecido (con tu candidate ID; lo recibes del organizador):
+**Variables de entorno**
 
-```powershell
-python control_tower.py --data ..\scuffers_all_mock_data\candidate_csvs --out outputs_full --candidate-id SCF-2026-XXXX
-```
+| Variable | Uso |
+|----------|-----|
+| `SCF_CANDIDATE_ID` | Candidate ID por defecto si no se pasa `--candidate-id` |
+| `SCF_SHIPPING_API_BASE` | Override del prefijo URL de la API (p. ej. mock local para validación end-to-end) |
 
-Si la API tarda o falla, el sistema sigue funcionando: las acciones se basan en datos internos, se anota explícitamente que la API no respondió y la confianza se ajusta.
+La API es **opt-in**: si no hay candidate id o se usa `--no-api`, el sistema sigue generando el Top 10 con la misma lógica de scoring sobre CSV; la confianza no se incrementa por capa logística no consultada.
 
-## Salidas generadas
+---
 
-Cada ejecución crea en `--out`:
+## Salidas
 
-- `top_actions.json`: top 10 con el formato del enunciado más `priority_score` y `valid_for_minutes` para trazabilidad.
-- `report.md`: reporte ejecutivo con TL;DR, tabla resumen, racional de scoring, supuestos y calidad de datos.
-- `dashboard.html`: panel autocontenido (TOP 3 hero + tabla del top 10 + SKUs críticos + pedidos en riesgo + barra de calidad de datos). Ábrelo con doble click.
-- `data_quality.json`: detalle de la calidad de datos (orphans, duplicados, oversell consumado, segmentos inconsistentes, pedidos en `payment_review`).
+Cada run escribe en `--out`:
 
-## Lógica del sistema (cómo lo defiendes)
+| Archivo | Descripción |
+|---------|-------------|
+| `top_actions.json` | Top 10 con el esquema del enunciado + `priority_score` y `valid_for_minutes` |
+| `report.md` | TL;DR, tablas, racional de scoring, impacto de la API si hubo llamadas, supuestos y data quality |
+| `dashboard.html` | Panel operativo: hero Top 3, feed de pedidos, Top 10, tablas de SKUs y riesgo, sección de impacto API |
+| `data_quality.json` | Duplicados, huérfanos, oversell, campos ruidosos, etc. |
+| `shipping_api_log.json` | Solo si hubo llamadas: latencia, estado, delta de score por pedido |
 
-1. **Ingesta tolerante**: cruza `orders + order_items + customers + inventory + support_tickets + campaigns` usando `canon_id` para SKUs ruidosos. Los precios estilo `€34,9` y los campos vacíos se normalizan al cargar.
-2. **5 señales por pedido** (escala 0-100): `customer_risk`, `support_risk`, `inventory_risk`, `logistics_risk`, `commercial_impact`. Magic numbers centralizados en `SOFT_MAX_CLV_EUR`, `SOFT_MAX_ORDER_VALUE_EUR`, `SOFT_MAX_VIEWS_PER_HOUR`.
-3. **10 detectores de acción**:
-   - `vip_rescue`
-   - `carrier_escalation` / `address_validation_fix` / `manual_shipping_review`
-   - `express_priority_pack`
-   - `payment_review_audit`
-   - `proactive_customer_contact`
-   - `pause_campaign` / `reduce_campaign_pressure` / `throttle_traffic` (oversell prevention con tiempo real de stockout y coste EUR)
-   - `stock_reallocation`
-   - `demand_forecast_alert` / `demand_forecast_watch` / `demand_forecast_rebalance`
-   - `support_macro_response`
-   - `carrier_capacity_review` (solo dispara con incidencia real o volumen >= 40 pedidos en la misma ruta)
-4. **Diversificación**: caps por familia (vip 3, marketing 4, logistics 3, support 2, forecast 2, customer 2, finance 2, inventory 2) y máx 2 acciones por target_id.
-5. **Cada acción expone**: `priority_score` (0-100), `confidence` (0-1), `valid_for_minutes` (ventana operativa) y un motivo verificable con tiempo a stockout en minutos y coste estimado en EUR cuando aplica.
-6. **Shipping API selectiva**: solo se consulta para los pedidos top (`--api-top`, default 25) y los resultados se reinyectan en el modelo. Caída de API ≠ caída del sistema.
+---
 
-## Predicción de demanda por analogía con drops anteriores
+## Ingeniería
 
-Aunque no nos dan histórico explícito, el detector `detect_demand_forecast` modela la curva típica de un drop cápsula:
+### Módulos principales
 
-- Velocidad base por hora = `sell_through_rate_last_hour * (disponibles + reservados)` (con fallback a unidades observadas en `order_items`).
-- Decaimiento del 25 % por hora durante las próximas 4 horas (peak en hora 1-2, después decae).
-- Multiplicador de campaña: 1.0x sin pauta → 1.5x con `very_high`.
-- Compara forecast vs `available + incoming` y traduce el gap a unidades **y** a euros (gap × `unit_price`).
+- **`control_tower.py`** — Orquestación: carga, features, detectores, diversificación, escritura de salidas.
+- **`shipping_api.py`** — Cliente HTTP, normalización defensiva de payload, política de pedidos relevantes para consultar, helpers de texto/UI.
 
-Output por SKU:
+### Flujo de datos (resumen)
 
-- `demand_forecast_alert` si gap ≥ 5 (pre-pedido / lista de espera + reasignación de tráfico).
-- `demand_forecast_watch` si gap entre 0 y 5 (campaña al límite).
-- `demand_forecast_rebalance` si gap < 0 (mover presupuesto a SKUs con gap positivo).
+1. Carga y ensamblado de casos por pedido (`assemble_order_cases`).
+2. Cálculo de features y score base (`compute_order_features`).
+3. Enriquecimiento opcional por API (`enrich_with_shipping_api` → recálculo de features).
+4. Detección de candidatos por tipo de acción (rescates, marketing, forecast, soporte, logística…).
+5. `diversify_actions`: caps por familia y deduplicación por target.
 
-## Calidad de datos detectada (mostrar al evaluador)
+### Detectores (familias)
 
-- 5 SKUs con oversell consumado (`reserved > available`): HOODIE-BLK-M, HOODIE-CRM-M, TEE-WHT-S, JORTS-BLU-M, ZIP-BLK-M.
-- 10 clientes en `customer_orders_count = 0` que aparecen en `orders.csv` (snapshot inconsistente, no bloqueante).
-- 10 pedidos en `payment_review`.
-- 2 pedidos sin `order_value` y 3 con formato ruidoso (`€34,9`).
-- 2 pedidos sin segmento.
+Incluyen entre otros: `vip_rescue`, `pause_campaign` / `throttle_traffic`, `demand_forecast_*`, `support_macro_response`, `carrier_escalation` / `address_validation_fix` / `manual_shipping_review`, `payment_review_audit`, `proactive_customer_contact`, `carrier_capacity_review` (con umbral estricto para evitar ruido).
 
-Todo expuesto en `data_quality.json` y resumido en la barra inferior del dashboard.
+### Pronóstico de demanda
 
-## Top 10 ya validado
+Heurística por analogía con drops tipo cápsula (pico y decaimiento configurable) cuando no hay histórico explícito en los datos; gap traducido a unidades y EUR para soporte a decisión de merchandising.
 
-Top 10 producido con los CSVs reales (`scuffers_all_mock_data/candidate_csvs`):
+---
 
-| # | Decisión | Action type | Target | Owner | Score | Conf. | Validez | Auto |
-|---|----------|-------------|--------|-------|-------|-------|---------|------|
-| 1 | Rescatar | `vip_rescue` | ORD-10567 | customer_care | 100 | 0.90 | 30 min | humano |
-| 2 | Pausar | `pause_campaign` | HOODIE-BLK-M | marketing | 100 | 0.82 | 30 min | auto |
-| 3 | Pausar | `pause_campaign` | TEE-WHT-S | marketing | 100 | 0.82 | 30 min | auto |
-| 4 | Frenar | `throttle_traffic` | JORTS-BLU-M | merchandising | 100 | 0.82 | 30 min | auto |
-| 5 | Pausar | `pause_campaign` | ZIP-BLK-M | marketing | 100 | 0.82 | 30 min | auto |
-| 6 | Crear macro | `support_macro_response` | PATTERN-me_preocupa_que_se_agote | customer_care | 100 | 0.80 | 120 min | auto |
-| 7 | Pronosticar | `demand_forecast_alert` | TEE-WHT-S | merchandising | 96 | 0.65 | 90 min | auto |
-| 8 | Pronosticar | `demand_forecast_alert` | HOODIE-BLK-M | merchandising | 96 | 0.65 | 90 min | auto |
-| 9 | Crear macro | `support_macro_response` | PATTERN-necesito_saber_si_mi_ped | customer_care | 95 | 0.80 | 120 min | auto |
-| 10 | Rescatar | `vip_rescue` | ORD-10460 | customer_care | 91 | 0.90 | 30 min | humano |
+## Referencias en este directorio
 
-## Supuestos y limitaciones (lee esto antes del Q&A)
+| Documento | Contenido |
+|-----------|-----------|
+| `ENUNCIADO_RESUMIDO.md` | Contexto del reto reconstruido |
+| `PLAN_RETO_SCUFFERS.md` | Estrategia de solución y scoring |
+| `PITCH_Y_DEMO.md` | Pitch corto, demo guiada, Q&A |
 
-- La curva de demanda asumida (peak hora 1-2, decay 25 %/h) es un proxy razonable, no un modelo entrenado con histórico real.
-- Los pesos de las 5 señales y de cada detector son heurísticos, defendibles, y se pueden mover a un fichero de config sin recompilar.
-- El sistema no toma decisiones financieras: no toca precios ni descuentos, solo escala a humano cuando hace falta.
-- `order_value` ruidoso o vacío se reconstruye con `unit_price * quantity` siempre que sea posible.
-- La API logística es opcional; el top 10 se entrega también en modo offline con la confianza ajustada.
-- Sin LLM en el flujo crítico: el LLM se reservaría para redactar mensajes a cliente o resumir el top 10 en lenguaje natural; la priorización es determinista y auditable.
+---
+
+## Fuente de verdad del Top 10
+
+Las tablas estáticas en documentación quedan obsoletas ante cualquier cambio de datos o modo API. Para revisión objetiva, usar siempre el **`top_actions.json`** generado en el último run (en el repo público: carpeta `docs/` como snapshot de entrega).
+
+---
+
+## Limitaciones operativas (transparencia)
+
+- Pesos y umbrales son heurísticos y auditables; sustituibles por configuración o por aprendizaje offline cuando existan etiquetas de resultado.
+- La curva de demanda sin histórico real es un proxy; con datos de drops previos se sustituye el núcleo sin cambiar el resto del pipeline.
+- Sin persistencia entre ejecuciones: diseño batch reproducible; extensión natural = base de datos operativa y jobs programados.
+
+Para el texto de entrega consolidado (resumen ejecutivo, arquitectura, limitaciones), ver **`../ENTREGA.md`** en la raíz del repositorio.

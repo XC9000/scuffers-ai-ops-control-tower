@@ -1,30 +1,73 @@
-# Scuffers — Material de preparación
+# Scuffers · AI Ops Control Tower
 
-Este directorio contiene los materiales preparados para el hackathon y la futura entrevista del proceso de selección de Scuffers.
+Sistema de priorización operativa para la ventana crítica de un drop: unifica pedidos, inventario, campañas, soporte y señal logística vía **Shipping Status API** (opcional), y produce un **Top 10 de acciones** con score interpretable, owner, confianza y ventana de validez.
 
-## Archivos
+**Stack:** Python 3 (stdlib únicamente) · salidas JSON, Markdown y dashboard HTML autocontenido.
 
-- `Propuesta tecnica detallada Scuffers.docx`: propuesta técnica completa explicando, pregunta a pregunta y caso a caso, cómo se llevarían a cabo realmente las soluciones planteadas en las respuestas del proceso anterior. Incluye arquitecturas, herramientas concretas, flujos paso a paso, métricas y frases para defender cada idea.
-- `Guia completa IA y automatizacion Scuffers.docx`: manual de referencia con conceptos, herramientas, estándares de la industria, creación de agentes, automatización, RAG, crawling, bases de datos, evaluación, seguridad y estrategia para el hackathon. Sirve como guía para mañana y como base para los primeros 90 días en el rol.
-- `hackathon_control_tower/`: carpeta específica para el reto real del hackathon. Incluye el enunciado resumido, plan de resolución, starter Python funcional, datos de ejemplo y guía de pitch/demo.
+---
 
-## Fuente editable
+## Demo y documentación de entrega
 
-- `propuesta_tecnica_detallada.md`
-- `guia_completa_ia_automatizacion.md`
+| Recurso | Enlace |
+|--------|--------|
+| **Dashboard (GitHub Pages)** | [Abrir demo en vivo](https://xc9000.github.io/scuffers-ai-ops-control-tower/) |
+| **Repositorio** | [github.com/XC9000/scuffers-ai-ops-control-tower](https://github.com/XC9000/scuffers-ai-ops-control-tower) |
+| **Resumen ejecutivo y arquitectura** | [ENTREGA.md](ENTREGA.md) |
+| **Top 10 (JSON)** | [docs/top_actions.json](docs/top_actions.json) |
+| **Reporte operativo** | [docs/report.md](docs/report.md) |
+| **Auditoría Shipping API** (cuando aplica) | [docs/shipping_api_log.json](docs/shipping_api_log.json) |
 
-Si quieres modificar contenido y regenerar los `.docx`, edita los `.md` y ejecuta:
+> El snapshot servido en Pages incluye la integración de la API de envíos con respuestas simuladas (mock) para mostrar la cadena completa en un entorno público; el pipeline es el mismo que contra la API del enunciado. Detalle en `ENTREGA.md`.
 
+---
+
+## Cómo ejecutar (local)
+
+Desde `hackathon_control_tower/`:
+
+```powershell
+# Análisis sin llamadas externas (misma lógica, sin enriquecimiento logístico)
+python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full --no-api
+
+# Con Shipping Status API (definir candidate id del organizador)
+python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full --candidate-id SCF-2026-XXXX
 ```
-python generar_docx.py
-```
 
-El script no requiere dependencias externas; produce archivos `.docx` válidos con estilos limpios usando solo la librería estándar.
+Variables útiles: `SCF_CANDIDATE_ID` (candidate id por defecto), `SCF_SHIPPING_API_BASE` (override del endpoint, p. ej. mock local para demo).
 
-## Cómo aprovechar el material
+Salidas en `--out`: `top_actions.json`, `report.md`, `dashboard.html`, `data_quality.json`, y `shipping_api_log.json` si hubo llamadas a la API.
 
-1. Lee primero la **guía completa** para fijar conceptos y vocabulario.
-2. Pasa luego a la **propuesta técnica detallada** y memoriza las "frases para defender" de cada pregunta. Son las que te hacen sonar senior.
-3. La noche antes del hackathon, repasa las secciones 8 y 10 de la propuesta (estrategia y demo recomendada).
-4. Durante el reto, usa la sección 7 de la guía como cheatsheet de plantillas (system prompt, esqueleto RAG, esqueleto agente).
-5. Para el reto real, entra en `hackathon_control_tower/` y usa `PLAN_RETO_SCUFFERS.md`, `PITCH_Y_DEMO.md` y `control_tower.py`.
+---
+
+## Arquitectura (visión de ingeniería)
+
+1. **Ingesta tolerante** — Cruza órdenes, líneas, clientes, inventario, tickets y campañas; normaliza SKUs ruidosos y campos inconsistentes.
+2. **Scoring explicable** — Cinco dimensiones por pedido (`customer_risk`, `support_risk`, `inventory_risk`, `logistics_risk`, `commercial_impact`), combinadas en un priority score auditable.
+3. **Capa logística incremental** — Módulo [`shipping_api.py`](hackathon_control_tower/shipping_api.py): llamadas selectivas, normalización defensiva de respuesta, fallback si la API falla; recalcula scoring sin sustituir la lógica base.
+4. **Detectores de acción** — Diez familias de intervención (rescate VIP, pausa de campaña, throttle por oversell, pronóstico de demanda por analogía con drops previos, macros de soporte, escalado carrier, etc.).
+5. **Diversificación** — Límite por familia y por `target_id` para evitar un Top 10 homogéneo.
+6. **Presentación** — JSON para integración, Markdown para briefings, HTML para operaciones en sala de control.
+
+Documentación técnica ampliada: [`hackathon_control_tower/README.md`](hackathon_control_tower/README.md).
+
+---
+
+## Estructura del repositorio
+
+| Ruta | Contenido |
+|------|------------|
+| `hackathon_control_tower/` | Código del Control Tower, módulo de API, guías de pitch y plan de reto |
+| `docs/` | Assets estáticos para GitHub Pages (no modificar para la demo en producción salvo acuerdo explícito) |
+| `scuffers_all_mock_data/` | CSVs de candidato / reto |
+| `ENTREGA.md` | Texto de entrega: resumen, arquitectura, top 10, limitaciones |
+| `*.md` / `generar_docx.py` | Material de preparación y generación de documentos Word (proceso de selección) |
+
+---
+
+## Preparación al proceso (material adicional)
+
+Proyecto base con guías y propuestas técnicas en Markdown; generación de `.docx` con `python generar_docx.py` (sin dependencias externas). No forma parte del entregable mínimo del Control Tower; ver archivos en raíz y `Propuesta tecnica detallada` / `Guia completa` en `.docx` si aplica.
+
+---
+
+**Autor / candidato:** entrega hackathon Scuffers (UDIA) · 2026

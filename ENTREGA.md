@@ -1,5 +1,7 @@
 # Scuffers AI Ops Control Tower · Entrega hackathon UDIA
 
+En la raíz del repositorio, [`README.md`](README.md) ofrece la **vista general** que ve un revisor al abrir el proyecto en GitHub (demo, enlaces, arranque rápido). Este documento amplía con **texto de entrega** listo para copiar o para defensa oral.
+
 > Sistema de priorización operativa para drops de alta demanda. Lee los CSV
 > sucios del negocio, los cruza, calcula riesgos explicables, consulta de
 > forma selectiva la Shipping Status API y devuelve las 10 acciones que el
