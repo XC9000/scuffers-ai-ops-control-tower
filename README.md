@@ -4,6 +4,12 @@ En la ventana crítica de un drop, el problema rara vez es la falta de datos: es
 
 Cuando el ritmo lo impone todo, la interfaz debe ganar en claridad y perder en ruido: prioridades visibles al instante, motivos verificables y una lectura que funcione tanto en sala de crisis como frente a un comité.
 
+### Demo alternativa (Railway) · tema oscuro y más funciones
+
+Versión desplegada en Railway con interfaz **dark** y funcionalidades ampliadas respecto al snapshot estático de Pages:
+
+**→ [https://scuffers-control-tower-dark-production.up.railway.app/](https://scuffers-control-tower-dark-production.up.railway.app/)**
+
 ### Demo en vivo
 
 **→ [https://xc9000.github.io/scuffers-ai-ops-control-tower/](https://xc9000.github.io/scuffers-ai-ops-control-tower/)**
