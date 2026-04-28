@@ -22,7 +22,7 @@ Decisiones clave:
 Uso:
     python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs \
                             --out outputs_full \
-                            --candidate-id SCF-2026-XXXX
+                            --candidate-id '#SCF-2026-6594'
 """
 
 from __future__ import annotations
@@ -2626,7 +2626,7 @@ def main() -> int:
     parser.add_argument(
         "--candidate-id",
         default=os.getenv("SCF_CANDIDATE_ID", ""),
-        help="ID tipo SCF-2026-XXXX para Shipping API",
+        help="ID de candidato (# opcional), ej. #SCF-2026-6594 para Shipping API",
     )
     parser.add_argument(
         "--api-top",

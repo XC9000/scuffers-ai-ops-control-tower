@@ -36,7 +36,7 @@ python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out ou
 4. Re-ejecutar con API:
 
 ```bash
-python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full --candidate-id SCF-2026-XXXX
+python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full --candidate-id '#SCF-2026-6594'
 ```
 
 5. Explicar qué cambia: si la API marca un pedido como `exception`, `lost`, `address_validation_error` o `requires_manual_review`, baja en prioridad la acción de marketing y sube la acción logística para ese pedido. Aunque la API caiga (401/timeout) el sistema sigue produciendo el top 10 con la confianza ajustada.

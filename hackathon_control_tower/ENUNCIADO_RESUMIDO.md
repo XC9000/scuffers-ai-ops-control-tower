@@ -110,7 +110,7 @@ GET https://lkuutmnykcnbfmbpopcu.functions.supabase.co/api/shipping-status/{orde
 Header obligatorio:
 
 ```text
-X-Candidate-Id: SCF-2026-XXXX
+X-Candidate-Id: #SCF-2026-6594
 ```
 
 Campos devueltos:

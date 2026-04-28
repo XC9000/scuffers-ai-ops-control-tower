@@ -151,7 +151,7 @@ cd scuffers-ai-ops-control-tower/hackathon_control_tower
 python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full --no-api
 
 # Modo API real
-python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full_api --candidate-id SCF-2026-XXXX --api-top 25
+python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full_api --candidate-id '#SCF-2026-6594' --api-top 25
 
 # Demo del camino feliz con mock local
 python _mock_shipping_api.py 8765

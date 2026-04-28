@@ -24,7 +24,7 @@ cd hackathon_control_tower
 python control_tower.py --data ..\scuffers_all_mock_data\candidate_csvs --out outputs_full --no-api
 
 # Con Shipping Status API (variable de entorno o flag)
-python control_tower.py --data ..\scuffers_all_mock_data\candidate_csvs --out outputs_full --candidate-id SCF-2026-XXXX --api-top 25
+python control_tower.py --data ..\scuffers_all_mock_data\candidate_csvs --out outputs_full --candidate-id '#SCF-2026-6594' --api-top 25
 
 # Banner opcional en el HTML (ej. snapshot público etiquetado como demo)
 python control_tower.py ... --demo-banner "Texto breve para revisores"
