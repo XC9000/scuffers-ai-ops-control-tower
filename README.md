@@ -1,8 +1,16 @@
 # Scuffers · AI Ops Control Tower
 
-Sistema de priorización operativa para la ventana crítica de un drop: unifica pedidos, inventario, campañas, soporte y señal logística vía **Shipping Status API** (opcional), y produce un **Top 10 de acciones** con score interpretable, owner, confianza y ventana de validez.
+En la ventana crítica de un drop, el problema rara vez es la falta de datos: es **ordenar el caos** antes de que se convierta en cancelaciones, tickets y reputación en riesgo. Esta torre de control une pedidos, inventario, campañas, soporte y, cuando aplica, la señal logística de la **Shipping Status API**, y devuelve un **Top 10 de acciones** con score interpretable, responsable asignado y ventana de validez.
 
-**Stack:** Python 3 (stdlib únicamente) · salidas JSON, Markdown y dashboard HTML autocontenido.
+Cuando el ritmo lo impone todo, la interfaz debe ganar en claridad y perder en ruido: prioridades visibles al instante, motivos verificables y una lectura que funcione tanto en sala de crisis como frente a un comité.
+
+### Demo en vivo
+
+**→ [https://xc9000.github.io/scuffers-ai-ops-control-tower/](https://xc9000.github.io/scuffers-ai-ops-control-tower/)**
+
+No requiere instalación: dashboard autocontenido, pensado para revisión rápida desde cualquier navegador.
+
+**Stack:** Python 3 (stdlib únicamente) · salidas JSON, Markdown y HTML.
 
 ---
 
@@ -21,24 +29,6 @@ Sistema de priorización operativa para la ventana crítica de un drop: unifica 
 
 ---
 
-## Cómo ejecutar (local)
-
-Desde `hackathon_control_tower/`:
-
-```powershell
-# Análisis sin llamadas externas (misma lógica, sin enriquecimiento logístico)
-python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full --no-api
-
-# Con Shipping Status API (definir candidate id del organizador)
-python control_tower.py --data ../scuffers_all_mock_data/candidate_csvs --out outputs_full --candidate-id SCF-2026-XXXX
-```
-
-Variables útiles: `SCF_CANDIDATE_ID` (candidate id por defecto), `SCF_SHIPPING_API_BASE` (override del endpoint, p. ej. mock local para demo).
-
-Salidas en `--out`: `top_actions.json`, `report.md`, `dashboard.html`, `data_quality.json`, y `shipping_api_log.json` si hubo llamadas a la API.
-
----
-
 ## Arquitectura (visión de ingeniería)
 
 1. **Ingesta tolerante** — Cruza órdenes, líneas, clientes, inventario, tickets y campañas; normaliza SKUs ruidosos y campos inconsistentes.
@@ -48,7 +38,7 @@ Salidas en `--out`: `top_actions.json`, `report.md`, `dashboard.html`, `data_qua
 5. **Diversificación** — Límite por familia y por `target_id` para evitar un Top 10 homogéneo.
 6. **Presentación** — JSON para integración, Markdown para briefings, HTML para operaciones en sala de control.
 
-Documentación técnica ampliada: [`hackathon_control_tower/README.md`](hackathon_control_tower/README.md).
+Documentación técnica ampliada (incluye ejecución local del pipeline): [`hackathon_control_tower/README.md`](hackathon_control_tower/README.md).
 
 ---
 
