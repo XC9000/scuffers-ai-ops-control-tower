@@ -66,4 +66,4 @@ Proyecto base con guías y propuestas técnicas en Markdown; generación de `.do
 
 ---
 
-**Autor / candidato:** entrega hackathon Scuffers (UDIA) · 2026
+**Autor:** Luis Calderón - Scuffers x UDIA Hackathon
