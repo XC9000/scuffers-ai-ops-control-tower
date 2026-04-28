@@ -1499,6 +1499,8 @@ def write_outputs(
     api_summary: dict[str, int],
     data_quality: dict[str, Any],
     out_dir: Path,
+    *,
+    demo_banner: str = "",
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1658,7 +1660,7 @@ def write_outputs(
 
     write_dashboard(
         actions, cases, skus, api_summary, data_quality, out_dir / "dashboard.html",
-        api_lifted=api_lifted,
+        api_lifted=api_lifted, demo_banner=demo_banner,
     )
 
 
@@ -1920,6 +1922,7 @@ def write_dashboard(
     path: Path,
     *,
     api_lifted: list[OrderCase] | None = None,
+    demo_banner: str = "",
 ) -> None:
     api_lifted = api_lifted or []
     families = Counter(PRIORITY_FAMILY.get(a["action_type"], "other") for a in actions)
@@ -2064,12 +2067,25 @@ def write_dashboard(
 
     families_html = "".join(family_chip(k, f"{k} · {v}") for k, v in families.most_common())
 
-    api_chip = (
-        f"OK {api_summary.get('ok', 0)} · errores {api_summary.get('errors', 0)} · "
-        f"manual_review {api_summary.get('manual_review', 0)} · severos {api_summary.get('severe', 0)}"
-        if api_summary.get('called')
-        else "no consultada (modo offline)"
+    demo_banner_html = (
+        f'<div class="demo-banner">{html.escape(demo_banner)}</div>'
+        if demo_banner else ""
     )
+
+    if api_summary.get("called", 0) == 0:
+        api_chip = "integrada · run offline (sin candidate id)"
+    elif api_summary.get("ok", 0) == 0:
+        api_chip = (
+            f"{api_summary.get('errors', 0)} errores HTTP · "
+            "fallback a datos internos sin perder ventana"
+        )
+    else:
+        api_chip = (
+            f"{api_summary.get('ok', 0)}/{api_summary.get('called', 0)} OK · "
+            f"{api_summary.get('severe', 0)} severos · "
+            f"{api_summary.get('manual_review', 0)} manual review · "
+            f"{api_summary.get('lifted_decisions', 0)} decisiones movidas"
+        )
 
     dq_files = data_quality["files"]
     dq_field = data_quality["field_issues"]
@@ -2170,6 +2186,19 @@ body {{
 .brand-meta {{ display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-3); }}
 .brand-time {{ font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-subtle); font-family: var(--font-mono); }}
 .brand-pills {{ display: flex; gap: var(--s-2); flex-wrap: wrap; justify-content: flex-end; }}
+.demo-banner {{
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; margin: 0 var(--s-7);
+    background: var(--surface-soft); border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    font-size: 11px; color: var(--ink-soft); letter-spacing: 0.02em;
+    width: fit-content;
+}}
+.demo-banner::before {{
+    content: 'DEMO'; font-weight: 600; letter-spacing: 0.16em;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    background: var(--ink); color: var(--bg); font-size: 9.5px;
+}}
 
 /* Layout */
 main {{
@@ -2399,6 +2428,7 @@ main {{
         </div>
     </div>
 </header>
+{demo_banner_html}
 <main>
     <section>
         <div class=\"sec-head\">
@@ -2519,6 +2549,8 @@ def run_pipeline(
     candidate_id: str,
     api_top: int,
     use_api: bool,
+    *,
+    demo_banner: str = "",
 ) -> dict[str, Any]:
     rows = load_csvs(data_dir)
     if not rows:
@@ -2565,7 +2597,10 @@ def run_pipeline(
     data_quality = assess_data_quality(
         rows, cases_by_id, skus, customers_by_id, items_by_order, tickets_by_order
     )
-    write_outputs(actions, cases, skus, api_summary, data_quality, out_dir)
+    write_outputs(
+        actions, cases, skus, api_summary, data_quality, out_dir,
+        demo_banner=demo_banner,
+    )
 
     return {
         "rows": len(rows),
@@ -2604,6 +2639,14 @@ def main() -> int:
         action="store_true",
         help="No consultar la Shipping Status API",
     )
+    parser.add_argument(
+        "--demo-banner",
+        default="",
+        help=(
+            "Si se pasa un texto, se muestra en el header del dashboard como "
+            "etiqueta de demo (util para snapshots publicos con datos simulados)."
+        ),
+    )
     args = parser.parse_args()
 
     data_dir = Path(args.data)
@@ -2619,7 +2662,10 @@ def main() -> int:
             "Shipping API omitida (define SCF_CANDIDATE_ID o usa --candidate-id para activarla)."
         )
 
-    summary = run_pipeline(data_dir, out_dir, candidate_id, args.api_top, use_api)
+    summary = run_pipeline(
+        data_dir, out_dir, candidate_id, args.api_top, use_api,
+        demo_banner=args.demo_banner.strip(),
+    )
 
     print(
         f"Filas leidas: {summary['rows']} | Pedidos: {summary['orders']} | SKUs: {summary['skus']} | "

@@ -120,6 +120,14 @@ Estructura mínima:
 
 > **Dashboard público**: <https://xc9000.github.io/scuffers-ai-ops-control-tower/>
 > _(disponible 30–60 s después de activar GitHub Pages — instrucciones abajo)._
+>
+> El snapshot servido por GitHub Pages tiene la integración **Shipping API
+> activada** apuntando al mock local (`_mock_shipping_api.py`) para que se vea
+> la cadena completa: chip de estado por pedido, sección "Cómo cambia la
+> decisión gracias a la API" y deltas de score. Esto se indica con la pegatina
+> **DEMO** en el header. En el run real contra la API del enunciado el
+> comportamiento es idéntico: cambia el contenido de las respuestas, no el
+> flujo.
 
 **Recorrido sugerido (90s)**
 
@@ -157,26 +165,26 @@ start outputs_full/dashboard.html
 
 ## 5. Top 10 acciones priorizadas
 
+> Datos del snapshot público (modo API activa, respuestas Shipping API
+> simuladas con `_mock_shipping_api.py`).
+
 | # | Decisión | Familia | Target | Owner | Score | Conf. | Validez | Auto |
 |---|----------|---------|--------|-------|------:|------:|--------:|------|
-| 1 | **Rescatar** | vip | `ORD-10567` | customer_care | 100.0 | 0.90 | 30 min | humano |
-| 2 | **Pausar campaña** | marketing | `HOODIE-BLK-M` | marketing | 100.0 | 0.82 | 30 min | auto |
-| 3 | **Pausar campaña** | marketing | `TEE-WHT-S` | marketing | 100.0 | 0.82 | 30 min | auto |
-| 4 | **Frenar tráfico** | marketing | `JORTS-BLU-M` | merchandising | 100.0 | 0.82 | 30 min | auto |
-| 5 | **Pausar campaña** | marketing | `ZIP-BLK-M` | marketing | 100.0 | 0.82 | 30 min | auto |
-| 6 | **Crear macro** | support | `PATTERN-me_preocupa_que_se_agote` | customer_care | 100.0 | 0.80 | 120 min | auto |
-| 7 | **Pronosticar demanda** | forecast | `TEE-WHT-S` | merchandising | 96.1 | 0.65 | 90 min | auto |
-| 8 | **Pronosticar demanda** | forecast | `HOODIE-BLK-M` | merchandising | 95.7 | 0.65 | 90 min | auto |
-| 9 | **Crear macro** | support | `PATTERN-necesito_saber_si_mi_ped` | customer_care | 95.0 | 0.80 | 120 min | auto |
-| 10 | **Rescatar** | vip | `ORD-10460` | customer_care | 90.6 | 0.90 | 30 min | humano |
+| 1 | **Rescatar** | vip | `ORD-10567` | customer_care | 100.0 | 0.95 | 30 min | humano |
+| 2 | **Escalar carrier** | logistics | `ORD-10460` | operations | 100.0 | 0.95 | 30 min | humano |
+| 3 | **Escalar carrier** | logistics | `ORD-10515` | operations | 100.0 | 0.95 | 30 min | humano |
+| 4 | **Escalar carrier** | logistics | `ORD-10530` | operations | 100.0 | 0.95 | 30 min | humano |
+| 5 | **Pausar campaña** | marketing | `HOODIE-BLK-M` | marketing | 100.0 | 0.82 | 30 min | auto |
+| 6 | **Pausar campaña** | marketing | `TEE-WHT-S` | marketing | 100.0 | 0.82 | 30 min | auto |
+| 7 | **Frenar tráfico** | marketing | `JORTS-BLU-M` | merchandising | 100.0 | 0.82 | 30 min | auto |
+| 8 | **Pausar campaña** | marketing | `ZIP-BLK-M` | marketing | 100.0 | 0.82 | 30 min | auto |
+| 9 | **Crear macro** | support | `PATTERN-me_preocupa_que_se_agote` | customer_care | 100.0 | 0.80 | 120 min | auto |
+| 10 | **Pronosticar demanda** | forecast | `TEE-WHT-S` | merchandising | 96.1 | 0.65 | 90 min | auto |
 
-JSON crudo: [`docs/top_actions.json`](./docs/top_actions.json) · Reporte: [`docs/report.md`](./docs/report.md) · Calidad de datos: [`docs/data_quality.json`](./docs/data_quality.json).
+**Cómo cambia el ranking gracias a la Shipping API**:
+en modo offline puro, los 4 escalados a carrier no aparecen en el TOP 10 (ceden hueco a un segundo VIP rescue, una segunda alerta de demanda y una segunda macro de soporte). Con la API activa entran 3 `carrier_escalation` (`ORD-10460`, `ORD-10515`, `ORD-10530`) porque la API confirma `exception · warehouse_delay` y `returned_to_sender`. El sistema absorbió **+19.4 puntos** en `ORD-10460` y **−2.6** en `ORD-10417` (un pedido `delivered`).
 
-**Lectura rápida de la lista**:
-- 2 rescates VIP humanos en clientes con LTV > 1200 EUR y ticket urgente.
-- 4 acciones de freno de tráfico/campaña sobre los SKUs en riesgo de oversell (HOODIE-BLK-M se agota en ~4 min al ritmo actual).
-- 2 macros de soporte cubren 7 tickets repetidos.
-- 2 alertas de pronóstico anticipan gaps de 109 y 113 unidades en las próximas 4 horas.
+JSON crudo: [`docs/top_actions.json`](./docs/top_actions.json) · Reporte: [`docs/report.md`](./docs/report.md) · Auditoría API: [`docs/shipping_api_log.json`](./docs/shipping_api_log.json) · Calidad de datos: [`docs/data_quality.json`](./docs/data_quality.json).
 
 ---
 

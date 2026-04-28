@@ -4,9 +4,9 @@
     "action_type": "vip_rescue",
     "target_id": "ORD-10567",
     "title": "Rescate VIP para CUS-2004 (pedido ORD-10567)",
-    "reason": "Cliente CUS-2004 (vip_customer, LTV 1246 EUR) tiene un ticket urgent con sentimiento negative sobre el pedido ORD-10567 de Red Logo Tee en Barcelona. Mensaje literal: \"Es un regalo y necesito confirmación de entrega.\".",
+    "reason": "Cliente CUS-2004 (vip_customer, LTV 1246 EUR) tiene un ticket urgent con sentimiento negative sobre el pedido ORD-10567 de Red Logo Tee en Barcelona. Mensaje literal: \"Es un regalo y necesito confirmación de entrega.\". La Shipping Status API confirma estado returned_to_sender, ETA 2026-04-33, delay_risk 0.56.",
     "expected_impact": "Salvar la relacion con un cliente top: contesta un agente senior en menos de 30 min, verifica estado real, ofrece compensacion proporcional y blinda LTV.",
-    "confidence": 0.9,
+    "confidence": 0.95,
     "owner": "customer_care",
     "automation_possible": false,
     "priority_score": 100.0,
@@ -14,6 +14,45 @@
   },
   {
     "rank": 2,
+    "action_type": "carrier_escalation",
+    "target_id": "ORD-10460",
+    "title": "Escalar incidencia logistica del pedido ORD-10460",
+    "reason": "Pedido ORD-10460 de Black Zip Hoodie a Bilbao via express. La Shipping Status API confirma estado exception, ETA 2026-04-33, delay_risk 0.42, motivo warehouse_delay, requires_manual_review=True. Cliente CUS-2033 (vip_customer).",
+    "expected_impact": "Abrir incidencia con transportista, ofrecer reposicion o reembolso anticipado y evitar ticket reactivo del cliente.",
+    "confidence": 0.95,
+    "owner": "operations",
+    "automation_possible": false,
+    "priority_score": 100.0,
+    "valid_for_minutes": 30
+  },
+  {
+    "rank": 3,
+    "action_type": "carrier_escalation",
+    "target_id": "ORD-10515",
+    "title": "Escalar incidencia logistica del pedido ORD-10515",
+    "reason": "Pedido ORD-10515 de Blue Denim Jorts a Valencia via express. La Shipping Status API confirma estado returned_to_sender, ETA 2026-04-33, delay_risk 0.74, requires_manual_review=True. Cliente CUS-2068 (new_customer).",
+    "expected_impact": "Abrir incidencia con transportista, ofrecer reposicion o reembolso anticipado y evitar ticket reactivo del cliente.",
+    "confidence": 0.95,
+    "owner": "operations",
+    "automation_possible": false,
+    "priority_score": 100.0,
+    "valid_for_minutes": 30
+  },
+  {
+    "rank": 4,
+    "action_type": "carrier_escalation",
+    "target_id": "ORD-10530",
+    "title": "Escalar incidencia logistica del pedido ORD-10530",
+    "reason": "Pedido ORD-10530 de Black Zip Hoodie a Sevilla via standard. La Shipping Status API confirma estado exception, ETA 2026-04-33, delay_risk 0.67, motivo warehouse_delay, requires_manual_review=True. Cliente CUS-2066 (new_customer).",
+    "expected_impact": "Abrir incidencia con transportista, ofrecer reposicion o reembolso anticipado y evitar ticket reactivo del cliente.",
+    "confidence": 0.95,
+    "owner": "operations",
+    "automation_possible": false,
+    "priority_score": 100.0,
+    "valid_for_minutes": 30
+  },
+  {
+    "rank": 5,
     "action_type": "pause_campaign",
     "target_id": "HOODIE-BLK-M",
     "title": "Pausar campana sobre Black Hoodie (HOODIE-BLK-M)",
@@ -26,7 +65,7 @@
     "valid_for_minutes": 30
   },
   {
-    "rank": 3,
+    "rank": 6,
     "action_type": "pause_campaign",
     "target_id": "TEE-WHT-S",
     "title": "Pausar campana sobre White Essential Tee (TEE-WHT-S)",
@@ -39,7 +78,7 @@
     "valid_for_minutes": 30
   },
   {
-    "rank": 4,
+    "rank": 7,
     "action_type": "throttle_traffic",
     "target_id": "JORTS-BLU-M",
     "title": "Frenar trafico hacia Blue Denim Jorts (JORTS-BLU-M) por riesgo de oversell",
@@ -52,7 +91,7 @@
     "valid_for_minutes": 30
   },
   {
-    "rank": 5,
+    "rank": 8,
     "action_type": "pause_campaign",
     "target_id": "ZIP-BLK-M",
     "title": "Pausar campana sobre Black Zip Hoodie (ZIP-BLK-M)",
@@ -65,7 +104,7 @@
     "valid_for_minutes": 30
   },
   {
-    "rank": 6,
+    "rank": 9,
     "action_type": "support_macro_response",
     "target_id": "PATTERN-me_preocupa_que_se_agote",
     "title": "Crear macro de respuesta para 4 tickets repetidos",
@@ -78,7 +117,7 @@
     "valid_for_minutes": 120
   },
   {
-    "rank": 7,
+    "rank": 10,
     "action_type": "demand_forecast_alert",
     "target_id": "TEE-WHT-S",
     "title": "Pronostico de demanda para White Essential Tee (TEE-WHT-S)",
@@ -89,44 +128,5 @@
     "automation_possible": true,
     "priority_score": 96.1,
     "valid_for_minutes": 90
-  },
-  {
-    "rank": 8,
-    "action_type": "demand_forecast_alert",
-    "target_id": "HOODIE-BLK-M",
-    "title": "Pronostico de demanda para Black Hoodie (HOODIE-BLK-M)",
-    "reason": "Curva tipica de drops anteriores (peak hora 1-2, decay 25%/h) + multiplicador 1.5x (very_high) sobre sell-through actual 82%/h. Pronostico 4h: ~115 ud demandadas vs 2 ud de supply (disp+entrante). Gap previsto +113 ud (~7902 EUR de venta en juego).",
-    "expected_impact": "Iniciar pre-pedido o lista de espera para Black Hoodie y reasignar trafico hacia SKUs alternativos (mismo producto otra talla/color) mientras se aprueba reposicion urgente. Permite tomar decisiones de produccion, reposicion y trafico antes de que la rotura sea visible para el cliente.",
-    "confidence": 0.65,
-    "owner": "merchandising",
-    "automation_possible": true,
-    "priority_score": 95.7,
-    "valid_for_minutes": 90
-  },
-  {
-    "rank": 9,
-    "action_type": "support_macro_response",
-    "target_id": "PATTERN-necesito_saber_si_mi_ped",
-    "title": "Crear macro de respuesta para 3 tickets repetidos",
-    "reason": "3 tickets distintos comparten el mismo mensaje literal: \"Necesito saber si mi pedido llegará antes del viernes.\". Pedidos afectados: ORD-10404, ORD-10496, ORD-10556. Canales: chat, instagram_dm. Urgencias detectadas: high, medium.",
-    "expected_impact": "Crear macro/template + automatizacion de primera respuesta libera al equipo de soporte para atender los casos realmente unicos. Reduce TFR (time to first response) en ~70%.",
-    "confidence": 0.8,
-    "owner": "customer_care",
-    "automation_possible": true,
-    "priority_score": 95.0,
-    "valid_for_minutes": 120
-  },
-  {
-    "rank": 10,
-    "action_type": "vip_rescue",
-    "target_id": "ORD-10460",
-    "title": "Rescate VIP para CUS-2033 (pedido ORD-10460)",
-    "reason": "Cliente CUS-2033 (vip_customer, LTV 2120 EUR) tiene un ticket high con sentimiento negative sobre el pedido ORD-10460 de Black Zip Hoodie en Bilbao. Mensaje literal: \"Me preocupa que se agote y no recibirme el pedido.\".",
-    "expected_impact": "Salvar la relacion con un cliente top: contesta un agente senior en menos de 30 min, verifica estado real, ofrece compensacion proporcional y blinda LTV.",
-    "confidence": 0.9,
-    "owner": "customer_care",
-    "automation_possible": false,
-    "priority_score": 90.6,
-    "valid_for_minutes": 30
   }
 ]
