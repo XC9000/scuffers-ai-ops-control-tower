@@ -1,0 +1,58 @@
+{
+  "files": {
+    "orders": 180,
+    "order_items": 180,
+    "customers": 120,
+    "inventory": 22,
+    "support_tickets": 18,
+    "campaigns": 5
+  },
+  "duplicates": {
+    "orders": [],
+    "customers": []
+  },
+  "orphans": {
+    "items_without_order": [],
+    "tickets_without_order": [],
+    "orders_with_unknown_customer": [],
+    "orders_with_sku_not_in_inventory": []
+  },
+  "field_issues": {
+    "missing_order_value": 2,
+    "noisy_order_value_format": 3,
+    "empty_customer_segment_in_orders": 2
+  },
+  "business_alerts": {
+    "skus_with_reserved_above_available": [
+      "HOODIE-BLK-M",
+      "HOODIE-CRM-M",
+      "TEE-WHT-S",
+      "JORTS-BLU-M",
+      "ZIP-BLK-M"
+    ],
+    "customers_with_orders_count_0_but_with_orders": [
+      "CUS-2002",
+      "CUS-2017",
+      "CUS-2020",
+      "CUS-2043",
+      "CUS-2063",
+      "CUS-2083",
+      "CUS-2091",
+      "CUS-2095",
+      "CUS-2101",
+      "CUS-2115"
+    ],
+    "orders_in_payment_review": [
+      "ORD-10419",
+      "ORD-10420",
+      "ORD-10425",
+      "ORD-10433",
+      "ORD-10466",
+      "ORD-10475",
+      "ORD-10503",
+      "ORD-10539",
+      "ORD-10551",
+      "ORD-10552"
+    ]
+  }
+}

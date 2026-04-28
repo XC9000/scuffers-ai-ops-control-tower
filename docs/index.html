@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Scuffers · AI Ops Control Tower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    /* Tokens de color: paleta clara, sobria, inspirada en la marca */
+    --bg: #f3f1ec;
+    --bg-soft: #ece9e1;
+    --surface: #ffffff;
+    --surface-soft: #fbfaf6;
+    --glass: rgba(255, 255, 255, 0.62);
+    --glass-strong: rgba(255, 255, 255, 0.78);
+    --ink: #0f0e0c;
+    --ink-soft: #44423d;
+    --ink-mute: #8a877f;
+    --ink-subtle: #b3afa5;
+    --line: #e3dfd3;
+    --line-soft: #ede9dc;
+
+    /* Acentos por familia (tonos apagados, alta legibilidad) */
+    --vip: #a3361f;            --vip-bg: #f6e6e0;
+    --logistics: #9b6a1f;      --logistics-bg: #f4ead2;
+    --marketing: #2c4d7a;      --marketing-bg: #e2eaf3;
+    --support: #5a3287;        --support-bg: #ede4f3;
+    --forecast: #1d6b62;       --forecast-bg: #def0ec;
+    --inventory: #1d566a;      --inventory-bg: #dee9ef;
+    --finance: #856719;        --finance-bg: #f3e9c7;
+    --customer: #3e6a3a;       --customer-bg: #e2ece1;
+    --other: #6b6860;          --other-bg: #ece8dc;
+
+    /* Spacing scale */
+    --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 72px;
+
+    /* Radius */
+    --r-sm: 6px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
+
+    /* Type */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    /* Shadows: muy sutiles */
+    --shadow-1: 0 1px 2px rgba(15, 14, 12, 0.04);
+    --shadow-2: 0 8px 24px rgba(15, 14, 12, 0.05);
+    --shadow-glass: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 12px 36px rgba(15, 14, 12, 0.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--ink);
+    font-feature-settings: 'cv11' 1, 'ss01' 1, 'tnum' 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
+}
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* Brand header */
+.brand-header {
+    padding: var(--s-7) var(--s-7) var(--s-5);
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: var(--s-5); flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+}
+.brand-id { display: flex; flex-direction: column; gap: var(--s-2); }
+.brand-mark { font-size: 13px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink); }
+.brand-product { font-size: 26px; font-weight: 400; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
+.brand-tag { font-size: 12px; color: var(--ink-mute); letter-spacing: 0.02em; }
+.brand-meta { display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-3); }
+.brand-time { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-subtle); font-family: var(--font-mono); }
+.brand-pills { display: flex; gap: var(--s-2); flex-wrap: wrap; justify-content: flex-end; }
+
+/* Layout */
+main {
+    max-width: 1440px; margin: 0 auto;
+    padding: var(--s-6) var(--s-7) var(--s-8);
+    display: flex; flex-direction: column; gap: var(--s-7);
+}
+
+/* Section header (typography-led, editorial) */
+.sec-head { display: flex; flex-direction: column; gap: var(--s-1); margin-bottom: var(--s-4); }
+.sec-head.row { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; }
+.sec-head .label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-subtle); font-weight: 500; }
+.sec-head h2 { font-size: 24px; font-weight: 400; letter-spacing: -0.02em; margin: 0; }
+.sec-head p { margin: 0; font-size: 13px; color: var(--ink-mute); max-width: 60ch; line-height: 1.55; }
+
+/* Card (panel base) */
+.card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: var(--s-5);
+    box-shadow: var(--shadow-1);
+}
+.card.glass {
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(227, 223, 211, 0.7);
+    box-shadow: var(--shadow-glass);
+}
+
+/* Hero (TOP 3) */
+.hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+@media (max-width: 980px) { .hero-grid { grid-template-columns: 1fr; } }
+.hero {
+    position: relative; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: var(--s-5);
+    display: flex; flex-direction: column; gap: var(--s-3);
+    box-shadow: var(--shadow-1);
+}
+.hero::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--ink);
+}
+.hero-vip::before    { background: var(--vip); }
+.hero-logistics::before { background: var(--logistics); }
+.hero-marketing::before { background: var(--marketing); }
+.hero-support::before   { background: var(--support); }
+.hero-forecast::before  { background: var(--forecast); }
+.hero-inventory::before { background: var(--inventory); }
+.hero-finance::before   { background: var(--finance); }
+.hero-customer::before  { background: var(--customer); }
+.hero-head { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.hero-rank { font-family: var(--font-mono); font-size: 12px; color: var(--ink-subtle); letter-spacing: 0.02em; }
+.hero-target { font-size: 11px; color: var(--ink-mute); margin-left: auto; }
+.hero h3 { margin: 0; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.4; }
+.hero-reason { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+.hero-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--line-soft); }
+.hero-meta span { display: flex; flex-direction: column; gap: 2px; }
+.hero-meta label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-subtle); font-weight: 500; }
+.hero-meta strong { font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--ink); }
+
+/* Chip system */
+.chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: var(--r-pill);
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
+    border: 1px solid transparent; line-height: 1; white-space: nowrap;
+}
+.chip-meta     { color: var(--ink-soft); background: var(--surface-soft); border-color: var(--line); }
+.chip-vip       { color: var(--vip); background: var(--vip-bg); border-color: rgba(163, 54, 31, 0.18); }
+.chip-logistics { color: var(--logistics); background: var(--logistics-bg); border-color: rgba(155, 106, 31, 0.18); }
+.chip-marketing { color: var(--marketing); background: var(--marketing-bg); border-color: rgba(44, 77, 122, 0.18); }
+.chip-support   { color: var(--support); background: var(--support-bg); border-color: rgba(90, 50, 135, 0.18); }
+.chip-forecast  { color: var(--forecast); background: var(--forecast-bg); border-color: rgba(29, 107, 98, 0.18); }
+.chip-inventory { color: var(--inventory); background: var(--inventory-bg); border-color: rgba(29, 86, 106, 0.18); }
+.chip-finance   { color: var(--finance); background: var(--finance-bg); border-color: rgba(133, 103, 25, 0.18); }
+.chip-customer  { color: var(--customer); background: var(--customer-bg); border-color: rgba(62, 106, 58, 0.18); }
+.chip-other     { color: var(--other); background: var(--other-bg); border-color: rgba(107, 104, 96, 0.18); }
+
+/* Live feed (panel translucido sutil) */
+.live-controls { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; margin-bottom: var(--s-4); }
+.live-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-mute); }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--vip); animation: pulse 1.6s infinite; }
+.live-dot.online { background: var(--forecast); animation: pulse-on 1.6s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(163, 54, 31, 0.35); } 50% { box-shadow: 0 0 0 6px rgba(163, 54, 31, 0); } }
+@keyframes pulse-on { 0%,100% { box-shadow: 0 0 0 0 rgba(29, 107, 98, 0.35); } 50% { box-shadow: 0 0 0 6px rgba(29, 107, 98, 0); } }
+.live-helper { font-size: 12px; color: var(--ink-mute); margin-left: auto; max-width: 50ch; text-align: right; }
+.live { display: grid; grid-template-columns: 2fr 1fr; gap: var(--s-4); }
+@media (max-width: 1080px) { .live { grid-template-columns: 1fr; } }
+.live-feed {
+    list-style: none; padding: 0; margin: 0;
+    max-height: 340px; overflow-y: auto;
+    border: 1px solid var(--line-soft); border-radius: var(--r-md);
+    background: var(--surface);
+}
+.live-feed li {
+    display: grid; grid-template-columns: 64px 110px 124px 1fr 96px;
+    gap: var(--s-3); padding: var(--s-3) var(--s-4);
+    border-bottom: 1px solid var(--line-soft);
+    align-items: center; font-size: 12px;
+}
+.live-feed li:last-child { border-bottom: 0; }
+.live-feed li.new { animation: slidein 0.5s ease; background: rgba(15, 14, 12, 0.025); }
+@keyframes slidein { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+.live-feed .time { font-family: var(--font-mono); font-size: 11px; color: var(--ink-subtle); }
+.live-feed .oid  { font-family: var(--font-mono); font-size: 11px; color: var(--ink); }
+.live-feed .sku  { font-family: var(--font-mono); font-size: 11px; color: var(--marketing); }
+.live-feed .right { text-align: right; font-family: var(--font-mono); font-size: 12px; color: var(--ink); }
+.live-feed .vip { color: var(--vip); font-weight: 600; }
+.live-stats { display: grid; grid-template-rows: auto auto auto; gap: var(--s-3); align-content: start; }
+.live-stat { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-md); padding: var(--s-4); }
+.live-stat label { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-subtle); font-weight: 500; }
+.live-stat strong { display: block; font-family: var(--font-mono); font-size: 24px; font-weight: 500; letter-spacing: -0.02em; margin-top: var(--s-1); color: var(--ink); }
+.live-stat span { display: block; font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+
+/* Buttons */
+.btn {
+    font-family: var(--font-sans); font-size: 12px; font-weight: 500; letter-spacing: 0.01em;
+    padding: 8px 16px; border-radius: var(--r-pill); cursor: pointer;
+    border: 1px solid var(--ink); background: var(--ink); color: var(--surface);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.btn:hover { opacity: 0.86; transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { background: var(--surface); opacity: 1; transform: none; }
+
+/* Tables (editorial, finas, generosas) */
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.data-table thead th {
+    text-transform: uppercase; font-size: 9.5px; letter-spacing: 0.14em;
+    font-weight: 500; color: var(--ink-subtle);
+    padding: var(--s-3) var(--s-4); text-align: left;
+    border-bottom: 1px solid var(--line); background: transparent;
+}
+.data-table thead th.num { text-align: right; }
+.data-table tbody td {
+    padding: var(--s-4); border-bottom: 1px solid var(--line-soft);
+    vertical-align: top; color: var(--ink); line-height: 1.55;
+}
+.data-table tbody td.num { text-align: right; color: var(--ink-soft); }
+.data-table tbody tr:hover td { background: var(--surface-soft); }
+.data-table tbody tr:last-child td { border-bottom: 0; }
+.data-table .rank { font-size: 11px; color: var(--ink-subtle); }
+.data-table .reason { max-width: 420px; color: var(--ink-soft); font-size: 12.5px; }
+.data-table .meta { display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-subtle); margin-top: 4px; letter-spacing: 0.01em; }
+
+/* Family chips strip */
+.family-strip { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-4); }
+
+/* Grid 2-col panels */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); }
+@media (max-width: 1080px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* API pill (estado logistico compacto) */
+.api-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    font-size: 10.5px; font-family: var(--font-mono); font-weight: 500;
+    border: 1px solid; line-height: 1.4; white-space: nowrap;
+}
+.api-pill-severe    { color: var(--vip);       background: var(--vip-bg);       border-color: rgba(163, 54, 31, 0.25); }
+.api-pill-manual    { color: var(--logistics); background: var(--logistics-bg); border-color: rgba(155, 106, 31, 0.25); }
+.api-pill-recovered { color: var(--forecast);  background: var(--forecast-bg);  border-color: rgba(29, 107, 98, 0.25); }
+.api-pill-ok        { color: var(--marketing); background: var(--marketing-bg); border-color: rgba(44, 77, 122, 0.25); }
+.api-pill-error     { color: var(--ink-soft);  background: var(--surface-soft); border-color: var(--line); border-style: dashed; }
+.api-pill-neutral   { color: var(--ink-subtle); background: transparent;        border-color: transparent; font-family: var(--font-sans); font-size: 11px; }
+
+/* DQ panel */
+.dq-strip { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.dq-note { margin-top: var(--s-3); font-size: 12px; color: var(--ink-mute); }
+.dq-note code { font-family: var(--font-mono); padding: 1px 6px; background: var(--surface-soft); border: 1px solid var(--line-soft); border-radius: var(--r-sm); font-size: 11px; }
+
+/* Modal (glass overlay) */
+.live-modal {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(15, 14, 12, 0.32);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+}
+.live-modal.open { display: flex; }
+.live-modal-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: var(--s-6);
+    max-width: 480px; width: 92%;
+    box-shadow: var(--shadow-2);
+}
+.live-modal-card h3 { margin: 0 0 var(--s-2); font-weight: 500; font-size: 18px; letter-spacing: -0.01em; }
+.live-modal-card p { color: var(--ink-mute); font-size: 13px; line-height: 1.6; margin: 0; }
+.live-modal-card input {
+    width: 100%; padding: 12px 14px; border-radius: var(--r-md);
+    border: 1px solid var(--line); background: var(--surface-soft);
+    color: var(--ink); font-family: var(--font-mono); font-size: 12.5px;
+    margin: var(--s-4) 0;
+}
+.live-modal-card input:focus { outline: none; border-color: var(--ink); background: var(--surface); }
+.live-modal-actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
+
+/* Footer */
+.brand-footer {
+    padding: var(--s-6) var(--s-7);
+    border-top: 1px solid var(--line);
+    color: var(--ink-subtle);
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    text-align: center;
+}
+
+::selection { background: var(--ink); color: var(--bg); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: var(--r-pill); border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-subtle); }
+</style>
+</head>
+<body>
+<header class="brand-header">
+    <div class="brand-id">
+        <span class="brand-mark">Scuffers</span>
+        <h1 class="brand-product">AI Ops Control Tower</h1>
+        <span class="brand-tag">Las decisiones que hay que tomar mientras corre el drop.</span>
+    </div>
+    <div class="brand-meta">
+        <span class="brand-time">2026 · 04 · 28  ·  17:57 UTC</span>
+        <div class="brand-pills">
+            <span class="chip chip-meta">180 pedidos</span>
+            <span class="chip chip-meta">22 SKUs</span>
+            <span class="chip chip-meta">Shipping API · no consultada (modo offline)</span>
+        </div>
+    </div>
+</header>
+<main>
+    <section>
+        <div class="sec-head">
+            <span class="label">Now / Top 3</span>
+            <h2>Las tres decisiones que el equipo debería ejecutar ya</h2>
+            <p>Diversificadas por familia y validadas con datos internos del drop. Cada tarjeta lleva su priority score, confianza, ventana de validez y modo de ejecución.</p>
+        </div>
+        <div class="hero-grid">
+        <article class="hero hero-vip">
+            <header class="hero-head">
+                <span class="hero-rank">01</span>
+                <span class="chip chip-vip">Rescatar</span>
+                <span class="hero-target mono">ORD-10567</span>
+            </header>
+            <h3>Rescate VIP para CUS-2004 (pedido ORD-10567)</h3>
+            <p class="hero-reason">Cliente CUS-2004 (vip_customer, LTV 1246 EUR) tiene un ticket urgent con sentimiento negative sobre el pedido ORD-10567 de Red Logo Tee en Barcelona. Mensaje literal: &quot;Es un regalo y necesito confirmación de entrega.&quot;.</p>
+            <div class="hero-meta">
+                <span><label>Score</label><strong>100.0</strong></span>
+                <span><label>Confianza</label><strong>0.90</strong></span>
+                <span><label>Validez</label><strong>30 min</strong></span>
+                <span><label>Modo</label><strong>Humano</strong></span>
+            </div>
+        </article>
+        
+        <article class="hero hero-marketing">
+            <header class="hero-head">
+                <span class="hero-rank">02</span>
+                <span class="chip chip-marketing">Pausar</span>
+                <span class="hero-target mono">HOODIE-BLK-M</span>
+            </header>
+            <h3>Pausar campana sobre Black Hoodie (HOODIE-BLK-M)</h3>
+            <p class="hero-reason">SKU HOODIE-BLK-M (Black Hoodie). Disponible 2, reservado 32 -&gt; agotamiento estimado en ~4 min al ritmo actual. Sell-through 82%/h, conversion 7.6% y 4573 vistas/h. Campanas: CMP-778 (tiktok, intensidad very_high). Coste estimado de no actua...</p>
+            <div class="hero-meta">
+                <span><label>Score</label><strong>100.0</strong></span>
+                <span><label>Confianza</label><strong>0.82</strong></span>
+                <span><label>Validez</label><strong>30 min</strong></span>
+                <span><label>Modo</label><strong>Auto</strong></span>
+            </div>
+        </article>
+        
+        <article class="hero hero-marketing">
+            <header class="hero-head">
+                <span class="hero-rank">03</span>
+                <span class="chip chip-marketing">Pausar</span>
+                <span class="hero-target mono">TEE-WHT-S</span>
+            </header>
+            <h3>Pausar campana sobre White Essential Tee (TEE-WHT-S)</h3>
+            <p class="hero-reason">SKU TEE-WHT-S (White Essential Tee). Disponible 2, reservado 40 -&gt; agotamiento estimado en ~3 min al ritmo actual. Sell-through 86%/h, conversion 7.1% y 4846 vistas/h. Campanas: CMP-779 (tiktok, intensidad high). Coste estimado de no actuar...</p>
+            <div class="hero-meta">
+                <span><label>Score</label><strong>100.0</strong></span>
+                <span><label>Confianza</label><strong>0.82</strong></span>
+                <span><label>Validez</label><strong>30 min</strong></span>
+                <span><label>Modo</label><strong>Auto</strong></span>
+            </div>
+        </article>
+        </div>
+    </section>
+
+    <section class="card glass">
+        <div class="sec-head row">
+            <div>
+                <span class="label">Live · Drop feed</span>
+                <h2>Drop en directo</h2>
+                <p>Replay cronológico de los pedidos del drop. Conecta un webhook real (Shopify orders/create, SSE o endpoint propio) para fusionar pedidos en tiempo real.</p>
+            </div>
+            <div class="live-controls">
+                <span class="live-status"><span class="live-dot" id="live-dot"></span><span id="live-status-label">Modo simulación offline</span></span>
+                <button class="btn" id="live-connect">Conectar feed en vivo</button>
+                <button class="btn ghost" id="live-pause">Pausar</button>
+                <button class="btn ghost" id="live-clear">Limpiar</button>
+            </div>
+        </div>
+        <div class="live">
+            <ul class="live-feed" id="live-feed"></ul>
+            <div class="live-stats">
+                <div class="live-stat"><label>Pedidos recibidos</label><strong id="live-count">0</strong><span id="live-rate">0 pedidos/min</span></div>
+                <div class="live-stat"><label>Importe acumulado</label><strong id="live-revenue">0 EUR</strong><span id="live-aov">AOV 0 EUR</span></div>
+                <div class="live-stat"><label>SKU más pedido (últimos 12)</label><strong id="live-top-sku">—</strong><span id="live-top-city">Ciudad: —</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="sec-head">
+            <span class="label">Top 10 priorizado</span>
+            <h2>Acciones recomendadas</h2>
+            <p>Cada acción lleva owner, score interpretable, confianza, ventana de validez y motivo verificable. Diversificación por familia con caps definidos en el motor.</p>
+        </div>
+        <div class="family-strip"><span class="chip chip-marketing">marketing · 4</span><span class="chip chip-vip">vip · 2</span><span class="chip chip-support">support · 2</span><span class="chip chip-forecast">forecast · 2</span></div>
+        <div class="card">
+            <table class="data-table">
+                <thead>
+                    <tr><th>#</th><th>Decisión</th><th>Acción</th><th>Owner</th><th class="num">Score</th><th class="num">Conf.</th><th class="num">Validez</th><th>Modo</th><th>Motivo</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td class="rank mono">01</td>
+            <td><span class="chip chip-vip">Rescatar</span></td>
+            <td><strong>Rescate VIP para CUS-2004 (pedido ORD-10567)</strong>
+                <span class="meta mono">vip_rescue · ORD-10567</span></td>
+            <td>customer_care</td>
+            <td class="mono num">100.0</td>
+            <td class="mono num">0.90</td>
+            <td class="mono num">30'</td>
+            <td>Humano</td>
+            <td class="reason">Cliente CUS-2004 (vip_customer, LTV 1246 EUR) tiene un ticket urgent con sentimiento negative sobre el pedido ORD-10567 de Red Logo Tee en Barcelona. Mensaje literal: &quot;Es un regalo y necesito confirmación de entrega.&quot;.</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">02</td>
+            <td><span class="chip chip-marketing">Pausar</span></td>
+            <td><strong>Pausar campana sobre Black Hoodie (HOODIE-BLK-M)</strong>
+                <span class="meta mono">pause_campaign · HOODIE-BLK-M</span></td>
+            <td>marketing</td>
+            <td class="mono num">100.0</td>
+            <td class="mono num">0.82</td>
+            <td class="mono num">30'</td>
+            <td>Auto</td>
+            <td class="reason">SKU HOODIE-BLK-M (Black Hoodie). Disponible 2, reservado 32 -&gt; agotamiento estimado en ~4 min al ritmo actual. Sell-through 82%/h, conversion 7.6% y 4573 vistas/h. Campanas: CMP-778 (tiktok, intensidad very_high). Coste estimado de no actuar la proxima hora: ~3918 EUR.</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">03</td>
+            <td><span class="chip chip-marketing">Pausar</span></td>
+            <td><strong>Pausar campana sobre White Essential Tee (TEE-WHT-S)</strong>
+                <span class="meta mono">pause_campaign · TEE-WHT-S</span></td>
+            <td>marketing</td>
+            <td class="mono num">100.0</td>
+            <td class="mono num">0.82</td>
+            <td class="mono num">30'</td>
+            <td>Auto</td>
+            <td class="reason">SKU TEE-WHT-S (White Essential Tee). Disponible 2, reservado 40 -&gt; agotamiento estimado en ~3 min al ritmo actual. Sell-through 86%/h, conversion 7.1% y 4846 vistas/h. Campanas: CMP-779 (tiktok, intensidad high). Coste estimado de no actuar la proxima hora: ~2520 EUR.</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">04</td>
+            <td><span class="chip chip-marketing">Frenar</span></td>
+            <td><strong>Frenar trafico hacia Blue Denim Jorts (JORTS-BLU-M) por riesgo de oversell</strong>
+                <span class="meta mono">throttle_traffic · JORTS-BLU-M</span></td>
+            <td>merchandising</td>
+            <td class="mono num">100.0</td>
+            <td class="mono num">0.82</td>
+            <td class="mono num">30'</td>
+            <td>Auto</td>
+            <td class="reason">SKU JORTS-BLU-M (Blue Denim Jorts). Disponible 16, reservado 25 -&gt; agotamiento estimado en ~39 min al ritmo actual. Sell-through 61%/h, conversion 6.8% y 3257 vistas/h. Campanas: sin campana pagada activa, pero con demanda organica acelerada. Coste estimado de no actuar la proxima hora: ~1071 EUR.</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">05</td>
+            <td><span class="chip chip-marketing">Pausar</span></td>
+            <td><strong>Pausar campana sobre Black Zip Hoodie (ZIP-BLK-M)</strong>
+                <span class="meta mono">pause_campaign · ZIP-BLK-M</span></td>
+            <td>marketing</td>
+            <td class="mono num">100.0</td>
+            <td class="mono num">0.82</td>
+            <td class="mono num">30'</td>
+            <td>Auto</td>
+            <td class="reason">SKU ZIP-BLK-M (Black Zip Hoodie). Disponible 6, reservado 37 -&gt; agotamiento estimado en ~11 min al ritmo actual. Sell-through 75%/h, conversion 7.6% y 3783 vistas/h. Campanas: CMP-780 (instagram, intensidad high). Coste estimado de no actuar la proxima hora: ~4578 EUR.</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">06</td>
+            <td><span class="chip chip-support">Crear macro</span></td>
+            <td><strong>Crear macro de respuesta para 4 tickets repetidos</strong>
+                <span class="meta mono">support_macro_response · PATTERN-me_preocupa_que_se_agote</span></td>
+            <td>customer_care</td>
+            <td class="mono num">100.0</td>
+            <td class="mono num">0.80</td>
+            <td class="mono num">120'</td>
+            <td>Auto</td>
+            <td class="reason">4 tickets distintos comparten el mismo mensaje literal: &quot;Me preocupa que se agote y no recibirme el pedido.&quot;. Pedidos afectados: ORD-10452, ORD-10460, ORD-10517, ORD-10568. Canales: email, instagram_dm. Urgencias detectadas: high, urgent.</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">07</td>
+            <td><span class="chip chip-forecast">Pronosticar</span></td>
+            <td><strong>Pronostico de demanda para White Essential Tee (TEE-WHT-S)</strong>
+                <span class="meta mono">demand_forecast_alert · TEE-WHT-S</span></td>
+            <td>merchandising</td>
+            <td class="mono num">96.1</td>
+            <td class="mono num">0.65</td>
+            <td class="mono num">90'</td>
+            <td>Auto</td>
+            <td class="reason">Curva tipica de drops anteriores (peak hora 1-2, decay 25%/h) + multiplicador 1.4x (high) sobre sell-through actual 86%/h. Pronostico 4h: ~141 ud demandadas vs 32 ud de supply (disp+entrante). Gap previsto +109 ud (~3806 EUR de venta en juego).</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">08</td>
+            <td><span class="chip chip-forecast">Pronosticar</span></td>
+            <td><strong>Pronostico de demanda para Black Hoodie (HOODIE-BLK-M)</strong>
+                <span class="meta mono">demand_forecast_alert · HOODIE-BLK-M</span></td>
+            <td>merchandising</td>
+            <td class="mono num">95.7</td>
+            <td class="mono num">0.65</td>
+            <td class="mono num">90'</td>
+            <td>Auto</td>
+            <td class="reason">Curva tipica de drops anteriores (peak hora 1-2, decay 25%/h) + multiplicador 1.5x (very_high) sobre sell-through actual 82%/h. Pronostico 4h: ~115 ud demandadas vs 2 ud de supply (disp+entrante). Gap previsto +113 ud (~7902 EUR de venta en juego).</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">09</td>
+            <td><span class="chip chip-support">Crear macro</span></td>
+            <td><strong>Crear macro de respuesta para 3 tickets repetidos</strong>
+                <span class="meta mono">support_macro_response · PATTERN-necesito_saber_si_mi_ped</span></td>
+            <td>customer_care</td>
+            <td class="mono num">95</td>
+            <td class="mono num">0.80</td>
+            <td class="mono num">120'</td>
+            <td>Auto</td>
+            <td class="reason">3 tickets distintos comparten el mismo mensaje literal: &quot;Necesito saber si mi pedido llegará antes del viernes.&quot;. Pedidos afectados: ORD-10404, ORD-10496, ORD-10556. Canales: chat, instagram_dm. Urgencias detectadas: high, medium.</td>
+        </tr>
+        
+        <tr>
+            <td class="rank mono">10</td>
+            <td><span class="chip chip-vip">Rescatar</span></td>
+            <td><strong>Rescate VIP para CUS-2033 (pedido ORD-10460)</strong>
+                <span class="meta mono">vip_rescue · ORD-10460</span></td>
+            <td>customer_care</td>
+            <td class="mono num">90.6</td>
+            <td class="mono num">0.90</td>
+            <td class="mono num">30'</td>
+            <td>Humano</td>
+            <td class="reason">Cliente CUS-2033 (vip_customer, LTV 2120 EUR) tiene un ticket high con sentimiento negative sobre el pedido ORD-10460 de Black Zip Hoodie en Bilbao. Mensaje literal: &quot;Me preocupa que se agote y no recibirme el pedido.&quot;.</td>
+        </tr>
+        </tbody>
+            </table>
+        </div>
+    </section>
+    
+    <div class="grid-2">
+        <section class="card">
+            <div class="sec-head">
+                <span class="label">Inventario</span>
+                <h2>SKUs críticos</h2>
+                <p>Velocidad y stockout estimado al ritmo actual.</p>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>SKU</th><th>Producto</th><th class="num">Disp.</th><th class="num">Reserv.</th><th class="num">Entrante</th><th class="num">STR/h</th><th class="num">Stockout</th><th class="num">Vistas/h</th><th class="num">Conv.</th></tr></thead>
+                <tbody>
+        <tr>
+            <td class="mono">TEE-WHT-S</td>
+            <td>White Essential Tee</td>
+            <td class="mono num">2</td>
+            <td class="mono num">40</td>
+            <td class="mono num">30 · 03:00</td>
+            <td class="mono num">86%/h</td>
+            <td class="mono num">3 min</td>
+            <td class="mono num">4846</td>
+            <td class="mono num">7.1%</td>
+        </tr>
+        
+        <tr>
+            <td class="mono">HOODIE-BLK-M</td>
+            <td>Black Hoodie</td>
+            <td class="mono num">2</td>
+            <td class="mono num">32</td>
+            <td class="mono num">0</td>
+            <td class="mono num">82%/h</td>
+            <td class="mono num">4 min</td>
+            <td class="mono num">4573</td>
+            <td class="mono num">7.6%</td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ZIP-BLK-M</td>
+            <td>Black Zip Hoodie</td>
+            <td class="mono num">6</td>
+            <td class="mono num">37</td>
+            <td class="mono num">0</td>
+            <td class="mono num">75%/h</td>
+            <td class="mono num">11 min</td>
+            <td class="mono num">3783</td>
+            <td class="mono num">7.6%</td>
+        </tr>
+        
+        <tr>
+            <td class="mono">HOODIE-CRM-M</td>
+            <td>Cream Hoodie</td>
+            <td class="mono num">18</td>
+            <td class="mono num">32</td>
+            <td class="mono num">30 · 21:00</td>
+            <td class="mono num">50%/h</td>
+            <td class="mono num">44 min</td>
+            <td class="mono num">3556</td>
+            <td class="mono num">5.4%</td>
+        </tr>
+        
+        <tr>
+            <td class="mono">JORTS-BLU-M</td>
+            <td>Blue Denim Jorts</td>
+            <td class="mono num">16</td>
+            <td class="mono num">25</td>
+            <td class="mono num">0</td>
+            <td class="mono num">61%/h</td>
+            <td class="mono num">39 min</td>
+            <td class="mono num">3257</td>
+            <td class="mono num">6.8%</td>
+        </tr>
+        
+        <tr>
+            <td class="mono">CAP-BLK-OS</td>
+            <td>Black Cap</td>
+            <td class="mono num">31</td>
+            <td class="mono num">14</td>
+            <td class="mono num">30 · 12:00</td>
+            <td class="mono num">56%/h</td>
+            <td class="mono num">1.2 h</td>
+            <td class="mono num">3574</td>
+            <td class="mono num">6.0%</td>
+        </tr>
+        
+        <tr>
+            <td class="mono">TEE-RED-L</td>
+            <td>Red Logo Tee</td>
+            <td class="mono num">34</td>
+            <td class="mono num">7</td>
+            <td class="mono num">0</td>
+            <td class="mono num">37%/h</td>
+            <td class="mono num">2.3 h</td>
+            <td class="mono num">2713</td>
+            <td class="mono num">5.3%</td>
+        </tr>
+        
+        <tr>
+            <td class="mono">HOODIE-BLK-S</td>
+            <td>Black Hoodie</td>
+            <td class="mono num">15</td>
+            <td class="mono num">8</td>
+            <td class="mono num">0</td>
+            <td class="mono num">28%/h</td>
+            <td class="mono num">2.3 h</td>
+            <td class="mono num">2511</td>
+            <td class="mono num">3.4%</td>
+        </tr>
+        </tbody>
+            </table>
+        </section>
+        <section class="card">
+            <div class="sec-head">
+                <span class="label">Pedidos</span>
+                <h2>Mayor score de riesgo</h2>
+                <p>Descomposición por las cinco señales explicables del modelo.</p>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Pedido</th><th class="num">Score</th><th class="num">Cliente</th><th class="num">Soporte</th><th class="num">Inv.</th><th class="num">Logística</th><th class="num">Impacto</th><th>API</th></tr></thead>
+                <tbody>
+        <tr>
+            <td class="mono">ORD-10460</td>
+            <td class="mono num">71.6</td>
+            <td class="mono num">100</td>
+            <td class="mono num">98</td>
+            <td class="mono num">80</td>
+            <td class="mono num">12</td>
+            <td class="mono num">60</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ORD-10517</td>
+            <td class="mono num">57.4</td>
+            <td class="mono num">62</td>
+            <td class="mono num">94</td>
+            <td class="mono num">66</td>
+            <td class="mono num">12</td>
+            <td class="mono num">42</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ORD-10567</td>
+            <td class="mono num">56.4</td>
+            <td class="mono num">93</td>
+            <td class="mono num">88</td>
+            <td class="mono num">32</td>
+            <td class="mono num">12</td>
+            <td class="mono num">51</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ORD-10417</td>
+            <td class="mono num">50.6</td>
+            <td class="mono num">59</td>
+            <td class="mono num">68</td>
+            <td class="mono num">66</td>
+            <td class="mono num">12</td>
+            <td class="mono num">42</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ORD-10568</td>
+            <td class="mono num">48.5</td>
+            <td class="mono num">20</td>
+            <td class="mono num">86</td>
+            <td class="mono num">80</td>
+            <td class="mono num">0</td>
+            <td class="mono num">60</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ORD-10556</td>
+            <td class="mono num">48.3</td>
+            <td class="mono num">25</td>
+            <td class="mono num">68</td>
+            <td class="mono num">81</td>
+            <td class="mono num">12</td>
+            <td class="mono num">61</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ORD-10475</td>
+            <td class="mono num">46.9</td>
+            <td class="mono num">69</td>
+            <td class="mono num">0</td>
+            <td class="mono num">80</td>
+            <td class="mono num">37</td>
+            <td class="mono num">60</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        
+        <tr>
+            <td class="mono">ORD-10553</td>
+            <td class="mono num">46.8</td>
+            <td class="mono num">30</td>
+            <td class="mono num">70</td>
+            <td class="mono num">80</td>
+            <td class="mono num">0</td>
+            <td class="mono num">60</td>
+            <td><span class="api-pill api-pill-neutral">—</span></td>
+        </tr>
+        </tbody>
+            </table>
+        </section>
+    </div>
+
+    <section>
+        <div class="sec-head">
+            <span class="label">Calidad de datos</span>
+            <h2>Lo que el motor encontró al cargar los CSV</h2>
+            <p>La confianza de cada acción se ajusta a estos hallazgos. Detalle completo en <code>data_quality.json</code>.</p>
+        </div>
+        <div class="card">
+            <div class="dq-strip"><span class="chip chip-meta">orders · 180</span><span class="chip chip-meta">items · 180</span><span class="chip chip-meta">tickets · 18</span><span class="chip chip-meta">campaigns · 5</span><span class="chip chip-meta">sin order_value · 2</span><span class="chip chip-meta">order_value ruidoso · 3</span><span class="chip chip-meta">sin segmento · 2</span><span class="chip chip-meta">oversell consumado · 5</span><span class="chip chip-meta">SKU desconocido · 0</span><span class="chip chip-meta">clientes desconocidos · 0</span></div>
+        </div>
+    </section>
+</main>
+<footer class="brand-footer">Python stdlib · Shipping Status API · score interpretable · diversificación por familia · validez por tipo</footer>
+<div class="live-modal" id="live-modal">
+    <div class="live-modal-card">
+        <h3>Conectar feed en vivo</h3>
+        <p>Apunta a un webhook de Shopify (<code>orders/create</code>), un endpoint Server-Sent Events o cualquier streaming endpoint propio que devuelva JSON con campos <code>order_id, customer_id, sku, city, value</code>. El dashboard fusionará esos pedidos con el simulador del drop.</p>
+        <input id="live-webhook" placeholder="https://api.scuffers.com/webhooks/orders" />
+        <div class="live-modal-actions">
+            <button class="btn ghost" id="live-cancel">Cancelar</button>
+            <button class="btn" id="live-confirm">Conectar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+  const ORDERS = [{"order_id": "ORD-10504", "customer_id": "CUS-2070", "sku": "TEE-WHT-M", "product": "White Essential Tee", "city": "Zaragoza", "method": "pickup_point", "segment": "loyal_customer", "value": 69.8, "created_at": "2026-04-28T16:00:48Z", "status": "paid"}, {"order_id": "ORD-10465", "customer_id": "CUS-2116", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Madrid", "method": "express", "segment": "repeat_customer", "value": 59.9, "created_at": "2026-04-28T16:02:13Z", "status": "paid"}, {"order_id": "ORD-10450", "customer_id": "CUS-2070", "sku": "KNIT-NVY-L", "product": "Navy Knit Sweater", "city": "Madrid", "method": "pickup_point", "segment": "loyal_customer", "value": 179.8, "created_at": "2026-04-28T16:04:18Z", "status": "paid"}, {"order_id": "ORD-10542", "customer_id": "CUS-2017", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 69.9, "created_at": "2026-04-28T16:05:19Z", "status": "processing"}, {"order_id": "ORD-10502", "customer_id": "CUS-2016", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Madrid", "method": "express", "segment": "loyal_customer", "value": 119.8, "created_at": "2026-04-28T16:05:25Z", "status": "paid"}, {"order_id": "ORD-10475", "customer_id": "CUS-2014", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Barcelona", "method": "express", "segment": "loyal_customer", "value": 79.9, "created_at": "2026-04-28T16:05:36Z", "status": "payment_review"}, {"order_id": "ORD-10498", "customer_id": "CUS-2008", "sku": "HOODIE-CRM-L", "product": "Cream Hoodie", "city": "Madrid", "method": "express", "segment": "repeat_customer", "value": 145.8, "created_at": "2026-04-28T16:07:19Z", "status": "paid"}, {"order_id": "ORD-10470", "customer_id": "CUS-2088", "sku": "TEE-BLK-M", "product": "Black Essential Tee", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:08:10Z", "status": "paid"}, {"order_id": "ORD-10404", "customer_id": "CUS-2057", "sku": "SOCKS-WHT-OS", "product": "White Socks Pack", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 14.9, "created_at": "2026-04-28T16:09:19Z", "status": "paid"}, {"order_id": "ORD-10494", "customer_id": "CUS-2045", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Madrid", "method": "standard", "segment": "vip_customer", "value": 89.9, "created_at": "2026-04-28T16:10:15Z", "status": "paid"}, {"order_id": "ORD-10509", "customer_id": "CUS-2017", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Sevilla", "method": "pickup_point", "segment": "new_customer", "value": 72.9, "created_at": "2026-04-28T16:10:37Z", "status": "paid"}, {"order_id": "ORD-10553", "customer_id": "CUS-2052", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Barcelona", "method": "standard", "segment": "repeat_customer", "value": 79.9, "created_at": "2026-04-28T16:11:54Z", "status": "paid"}, {"order_id": "ORD-10468", "customer_id": "CUS-2049", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Bilbao", "method": "standard", "segment": "loyal_customer", "value": 64.9, "created_at": "2026-04-28T16:13:05Z", "status": "paid"}, {"order_id": "ORD-10401", "customer_id": "CUS-2080", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 59.9, "created_at": "2026-04-28T16:13:15Z", "status": "paid"}, {"order_id": "ORD-10500", "customer_id": "CUS-2008", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Barcelona", "method": "standard", "segment": "repeat_customer", "value": 59.9, "created_at": "2026-04-28T16:13:57Z", "status": "paid"}, {"order_id": "ORD-10422", "customer_id": "CUS-2074", "sku": "HOODIE-BLK-L", "product": "Black Hoodie", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 69.9, "created_at": "2026-04-28T16:14:01Z", "status": "paid"}, {"order_id": "ORD-10435", "customer_id": "CUS-2091", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T16:14:26Z", "status": "paid"}, {"order_id": "ORD-10414", "customer_id": "CUS-2028", "sku": "ZIP-BLK-L", "product": "Black Zip Hoodie", "city": "Bilbao", "method": "standard", "segment": "new_customer", "value": 79.9, "created_at": "2026-04-28T16:14:49Z", "status": "paid"}, {"order_id": "ORD-10499", "customer_id": "CUS-2022", "sku": "TEE-WHT-M", "product": "White Essential Tee", "city": "Zaragoza", "method": "express", "segment": "loyal_customer", "value": 34.9, "created_at": "2026-04-28T16:15:49Z", "status": "processing"}, {"order_id": "ORD-10418", "customer_id": "CUS-2037", "sku": "TEE-WHT-M", "product": "White Essential Tee", "city": "Zaragoza", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:15:51Z", "status": "paid"}, {"order_id": "ORD-10490", "customer_id": "CUS-2057", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Barcelona", "method": "pickup_point", "segment": "new_customer", "value": 179.7, "created_at": "2026-04-28T16:16:56Z", "status": "paid"}, {"order_id": "ORD-10413", "customer_id": "CUS-2041", "sku": "TEE-RED-L", "product": "Red Logo Tee", "city": "Sevilla", "method": "express", "segment": "new_customer", "value": 73.8, "created_at": "2026-04-28T16:17:02Z", "status": "paid"}, {"order_id": "ORD-10560", "customer_id": "CUS-2113", "sku": "ZIP-BLK-L", "product": "Black Zip Hoodie", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 159.8, "created_at": "2026-04-28T16:18:03Z", "status": "paid"}, {"order_id": "ORD-10514", "customer_id": "CUS-2117", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Barcelona", "method": "standard", "segment": "at_risk_customer", "value": 29.9, "created_at": "2026-04-28T16:18:36Z", "status": "processing"}, {"order_id": "ORD-10539", "customer_id": "CUS-2112", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Barcelona", "method": "express", "segment": "loyal_customer", "value": 39.9, "created_at": "2026-04-28T16:19:08Z", "status": "payment_review"}, {"order_id": "ORD-10409", "customer_id": "CUS-2085", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:20:11Z", "status": "packed"}, {"order_id": "ORD-10570", "customer_id": "CUS-2098", "sku": "TEE-RED-L", "product": "Red Logo Tee", "city": "Malaga", "method": "standard", "segment": "repeat_customer", "value": 36.9, "created_at": "2026-04-28T16:20:34Z", "status": "paid"}, {"order_id": "ORD-10548", "customer_id": "CUS-2109", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Zaragoza", "method": "express", "segment": "repeat_customer", "value": 79.9, "created_at": "2026-04-28T16:21:21Z", "status": "paid"}, {"order_id": "ORD-10559", "customer_id": "CUS-2088", "sku": "TEE-WHT-M", "product": "White Essential Tee", "city": "Murcia", "method": "express", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:22:32Z", "status": "paid"}, {"order_id": "ORD-10454", "customer_id": "CUS-2053", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Palma", "method": "express", "segment": "repeat_customer", "value": 34.9, "created_at": "2026-04-28T16:22:40Z", "status": "paid"}, {"order_id": "ORD-10424", "customer_id": "CUS-2115", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Sevilla", "method": "express", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:22:50Z", "status": "paid"}, {"order_id": "ORD-10580", "customer_id": "CUS-2057", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Sevilla", "method": "standard", "segment": "new_customer", "value": 72.9, "created_at": "2026-04-28T16:23:10Z", "status": "paid"}, {"order_id": "ORD-10556", "customer_id": "CUS-2025", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Madrid", "method": "express", "segment": "new_customer", "value": 139.8, "created_at": "2026-04-28T16:24:45Z", "status": "paid"}, {"order_id": "ORD-10452", "customer_id": "CUS-2069", "sku": "TEE-BLK-M", "product": "Black Essential Tee", "city": "Barcelona", "method": "standard", "segment": "at_risk_customer", "value": 34.9, "created_at": "2026-04-28T16:24:59Z", "status": "processing"}, {"order_id": "ORD-10522", "customer_id": "CUS-2001", "sku": "TEE-BLK-L", "product": "Black Essential Tee", "city": "Sevilla", "method": "express", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:25:06Z", "status": "paid"}, {"order_id": "ORD-10448", "customer_id": "CUS-2010", "sku": "TEE-RED-L", "product": "Red Logo Tee", "city": "Malaga", "method": "pickup_point", "segment": "new_customer", "value": 36.9, "created_at": "2026-04-28T16:25:36Z", "status": "paid"}, {"order_id": "ORD-10546", "customer_id": "CUS-2046", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 64.9, "created_at": "2026-04-28T16:26:44Z", "status": "processing"}, {"order_id": "ORD-10408", "customer_id": "CUS-2083", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 39.9, "created_at": "2026-04-28T16:27:21Z", "status": "processing"}, {"order_id": "ORD-10493", "customer_id": "CUS-2068", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T16:27:40Z", "status": "paid"}, {"order_id": "ORD-10525", "customer_id": "CUS-2016", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Palma", "method": "standard", "segment": "loyal_customer", "value": 89.9, "created_at": "2026-04-28T16:27:51Z", "status": "paid"}, {"order_id": "ORD-10457", "customer_id": "CUS-2062", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Barcelona", "method": "pickup_point", "segment": "new_customer", "value": 145.8, "created_at": "2026-04-28T16:27:59Z", "status": "paid"}, {"order_id": "ORD-10455", "customer_id": "CUS-2020", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:28:19Z", "status": "packed"}, {"order_id": "ORD-10554", "customer_id": "CUS-2084", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 79.8, "created_at": "2026-04-28T16:28:54Z", "status": "paid"}, {"order_id": "ORD-10565", "customer_id": "CUS-2101", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 59.9, "created_at": "2026-04-28T16:28:56Z", "status": "paid"}, {"order_id": "ORD-10578", "customer_id": "CUS-2095", "sku": "SWEAT-GRY-L", "product": "Grey Sweatpants", "city": "Madrid", "method": "express", "segment": "new_customer", "value": 129.8, "created_at": "2026-04-28T16:29:04Z", "status": "paid"}, {"order_id": "ORD-10492", "customer_id": "CUS-2105", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Sevilla", "method": "standard", "segment": "new_customer", "value": 139.8, "created_at": "2026-04-28T16:29:24Z", "status": "paid"}, {"order_id": "ORD-10442", "customer_id": "CUS-2042", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Bilbao", "method": "express", "segment": "repeat_customer", "value": 34.9, "created_at": "2026-04-28T16:29:34Z", "status": "paid"}, {"order_id": "ORD-10495", "customer_id": "CUS-2096", "sku": "TEE-BLK-M", "product": "Black Essential Tee", "city": "Bilbao", "method": "express", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:30:31Z", "status": "paid"}, {"order_id": "ORD-10421", "customer_id": "CUS-2019", "sku": "ZIP-BLK-L", "product": "Black Zip Hoodie", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 79.9, "created_at": "2026-04-28T16:30:49Z", "status": "paid"}, {"order_id": "ORD-10445", "customer_id": "CUS-2012", "sku": "TEE-BLK-M", "product": "Black Essential Tee", "city": "Murcia", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:31:00Z", "status": "paid"}, {"order_id": "ORD-10562", "customer_id": "CUS-2101", "sku": "KNIT-NVY-L", "product": "Navy Knit Sweater", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 89.9, "created_at": "2026-04-28T16:32:12Z", "status": "paid"}, {"order_id": "ORD-10518", "customer_id": "CUS-2106", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Zaragoza", "method": "standard", "segment": "repeat_customer", "value": 64.9, "created_at": "2026-04-28T16:33:13Z", "status": "paid"}, {"order_id": "ORD-10512", "customer_id": "CUS-2070", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Valencia", "method": "standard", "segment": "loyal_customer", "value": 79.9, "created_at": "2026-04-28T16:34:11Z", "status": "paid"}, {"order_id": "ORD-10511", "customer_id": "CUS-2083", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T16:35:24Z", "status": "paid"}, {"order_id": "ORD-10433", "customer_id": "CUS-2047", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Valencia", "method": "express", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T16:35:52Z", "status": "payment_review"}, {"order_id": "ORD-10427", "customer_id": "CUS-2042", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Palma", "method": "standard", "segment": "repeat_customer", "value": 89.9, "created_at": "2026-04-28T16:36:54Z", "status": "paid"}, {"order_id": "ORD-10547", "customer_id": "CUS-2093", "sku": "SWEAT-GRY-L", "product": "Grey Sweatpants", "city": "Sevilla", "method": "standard", "segment": "repeat_customer", "value": 129.8, "created_at": "2026-04-28T16:37:16Z", "status": "paid"}, {"order_id": "ORD-10415", "customer_id": "CUS-2077", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Valencia", "method": "express", "segment": "repeat_customer", "value": 59.9, "created_at": "2026-04-28T16:37:27Z", "status": "paid"}, {"order_id": "ORD-10508", "customer_id": "CUS-2012", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 129.8, "created_at": "2026-04-28T16:38:16Z", "status": "packed"}, {"order_id": "ORD-10429", "customer_id": "CUS-2083", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Malaga", "method": "express", "segment": "new_customer", "value": 89.9, "created_at": "2026-04-28T16:38:29Z", "status": "paid"}, {"order_id": "ORD-10443", "customer_id": "CUS-2120", "sku": "SWEAT-GRY-L", "product": "Grey Sweatpants", "city": "Madrid", "method": "standard", "segment": "repeat_customer", "value": 129.8, "created_at": "2026-04-28T16:38:36Z", "status": "paid"}, {"order_id": "ORD-10463", "customer_id": "CUS-2048", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Madrid", "method": "express", "segment": "repeat_customer", "value": 89.9, "created_at": "2026-04-28T16:38:43Z", "status": "packed"}, {"order_id": "ORD-10477", "customer_id": "CUS-2118", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Palma", "method": "standard", "segment": "new_customer", "value": 89.9, "created_at": "2026-04-28T16:39:21Z", "status": "paid"}, {"order_id": "ORD-10425", "customer_id": "CUS-2060", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Valencia", "method": "standard", "segment": "at_risk_customer", "value": 79.9, "created_at": "2026-04-28T16:39:25Z", "status": "payment_review"}, {"order_id": "ORD-10410", "customer_id": "CUS-2079", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Barcelona", "method": "standard", "segment": "at_risk_customer", "value": 34.9, "created_at": "2026-04-28T16:39:51Z", "status": "packed"}, {"order_id": "ORD-10529", "customer_id": "CUS-2112", "sku": "HOODIE-CRM-L", "product": "Cream Hoodie", "city": "Bilbao", "method": "express", "segment": "loyal_customer", "value": 72.9, "created_at": "2026-04-28T16:41:17Z", "status": "paid"}, {"order_id": "ORD-10487", "customer_id": "CUS-2111", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 39.9, "created_at": "2026-04-28T16:41:53Z", "status": "paid"}, {"order_id": "ORD-10469", "customer_id": "CUS-2014", "sku": "HOODIE-BLK-S", "product": "Black Hoodie", "city": "Madrid", "method": "standard", "segment": "loyal_customer", "value": 69.9, "created_at": "2026-04-28T16:41:55Z", "status": "paid"}, {"order_id": "ORD-10528", "customer_id": "CUS-2080", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Madrid", "method": "pickup_point", "segment": "loyal_customer", "value": 29.9, "created_at": "2026-04-28T16:42:44Z", "status": "paid"}, {"order_id": "ORD-10515", "customer_id": "CUS-2068", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Valencia", "method": "express", "segment": "new_customer", "value": 59.9, "created_at": "2026-04-28T16:43:45Z", "status": "paid"}, {"order_id": "ORD-10402", "customer_id": "CUS-2066", "sku": "SOCKS-WHT-OS", "product": "White Socks Pack", "city": "Madrid", "method": "express", "segment": "new_customer", "value": 14.9, "created_at": "2026-04-28T16:44:46Z", "status": "processing"}, {"order_id": "ORD-10482", "customer_id": "CUS-2037", "sku": "HOODIE-BLK-L", "product": "Black Hoodie", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 69.9, "created_at": "2026-04-28T16:45:00Z", "status": "paid"}, {"order_id": "ORD-10420", "customer_id": "CUS-2022", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Madrid", "method": "express", "segment": "loyal_customer", "value": 64.9, "created_at": "2026-04-28T16:45:39Z", "status": "payment_review"}, {"order_id": "ORD-10458", "customer_id": "CUS-2100", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Sevilla", "method": "standard", "segment": "repeat_customer", "value": 34.9, "created_at": "2026-04-28T16:46:32Z", "status": "processing"}, {"order_id": "ORD-10476", "customer_id": "CUS-2066", "sku": "SWEAT-GRY-L", "product": "Grey Sweatpants", "city": "Sevilla", "method": "standard", "segment": "new_customer", "value": 64.9, "created_at": "2026-04-28T16:47:25Z", "status": "paid"}, {"order_id": "ORD-10534", "customer_id": "CUS-2075", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Sevilla", "method": "express", "segment": "repeat_customer", "value": 69.9, "created_at": "2026-04-28T16:47:35Z", "status": "paid"}, {"order_id": "ORD-10505", "customer_id": "CUS-2092", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Madrid", "method": "express", "segment": "loyal_customer", "value": 34.9, "created_at": "2026-04-28T16:52:44Z", "status": "processing"}, {"order_id": "ORD-10524", "customer_id": "CUS-2097", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Malaga", "method": "express", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T16:53:34Z", "status": "paid"}, {"order_id": "ORD-10574", "customer_id": "CUS-2089", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T16:54:10Z", "status": "paid"}, {"order_id": "ORD-10467", "customer_id": "CUS-2101", "sku": "KNIT-NVY-L", "product": "Navy Knit Sweater", "city": "Barcelona", "method": "pickup_point", "segment": "new_customer", "value": 89.9, "created_at": "2026-04-28T16:55:11Z", "status": "paid"}, {"order_id": "ORD-10419", "customer_id": "CUS-2119", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Madrid", "method": "standard", "segment": "repeat_customer", "value": 79.9, "created_at": "2026-04-28T16:55:38Z", "status": "payment_review"}, {"order_id": "ORD-10423", "customer_id": "CUS-2089", "sku": "TEE-RED-L", "product": "Red Logo Tee", "city": "Madrid", "method": "express", "segment": "new_customer", "value": 36.9, "created_at": "2026-04-28T16:57:11Z", "status": "processing"}, {"order_id": "ORD-10531", "customer_id": "CUS-2082", "sku": "TEE-RED-L", "product": "Red Logo Tee", "city": "Madrid", "method": "standard", "segment": "loyal_customer", "value": 36.9, "created_at": "2026-04-28T16:57:11Z", "status": "processing"}, {"order_id": "ORD-10540", "customer_id": "CUS-2063", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 104.7, "created_at": "2026-04-28T16:57:17Z", "status": "paid"}, {"order_id": "ORD-10567", "customer_id": "CUS-2004", "sku": "TEE-RED-L", "product": "Red Logo Tee", "city": "Barcelona", "method": "express", "segment": "vip_customer", "value": 73.8, "created_at": "2026-04-28T16:57:31Z", "status": "paid"}, {"order_id": "ORD-10474", "customer_id": "CUS-2031", "sku": "HOODIE-CRM-L", "product": "Cream Hoodie", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 72.9, "created_at": "2026-04-28T16:57:38Z", "status": "paid"}, {"order_id": "ORD-10460", "customer_id": "CUS-2033", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Bilbao", "method": "express", "segment": "vip_customer", "value": 79.9, "created_at": "2026-04-28T16:58:10Z", "status": "paid"}, {"order_id": "ORD-10430", "customer_id": "CUS-2052", "sku": "HOODIE-BLK-L", "product": "Black Hoodie", "city": "Valencia", "method": "standard", "segment": "repeat_customer", "value": 69.9, "created_at": "2026-04-28T16:59:07Z", "status": "paid"}, {"order_id": "ORD-10432", "customer_id": "CUS-2007", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Zaragoza", "method": "express", "segment": "loyal_customer", "value": 69.9, "created_at": "2026-04-28T17:00:18Z", "status": "paid"}, {"order_id": "ORD-10496", "customer_id": "CUS-2111", "sku": "ZIP-BLK-L", "product": "Black Zip Hoodie", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 79.9, "created_at": "2026-04-28T17:00:49Z", "status": "paid"}, {"order_id": "ORD-10488", "customer_id": "CUS-2052", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Alicante", "method": "standard", "segment": "repeat_customer", "value": 59.9, "created_at": "2026-04-28T17:02:20Z", "status": "paid"}, {"order_id": "ORD-10516", "customer_id": "CUS-2018", "sku": "KNIT-NVY-L", "product": "Navy Knit Sweater", "city": "Barcelona", "method": "express", "segment": "new_customer", "value": 89.9, "created_at": "2026-04-28T17:02:41Z", "status": "paid"}, {"order_id": "ORD-10453", "customer_id": "CUS-2057", "sku": "HOODIE-CRM-L", "product": "Cream Hoodie", "city": "Zaragoza", "method": "standard", "segment": "new_customer", "value": 72.9, "created_at": "2026-04-28T17:04:18Z", "status": "paid"}, {"order_id": "ORD-10466", "customer_id": "CUS-2050", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Murcia", "method": "express", "segment": "loyal_customer", "value": 79.9, "created_at": "2026-04-28T17:04:47Z", "status": "payment_review"}, {"order_id": "ORD-10563", "customer_id": "CUS-2058", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Madrid", "method": "standard", "segment": "repeat_customer", "value": 72.9, "created_at": "2026-04-28T17:05:07Z", "status": "paid"}, {"order_id": "ORD-10558", "customer_id": "CUS-2058", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Valencia", "method": "pickup_point", "segment": "repeat_customer", "value": 79.9, "created_at": "2026-04-28T17:05:19Z", "status": "packed"}, {"order_id": "ORD-10431", "customer_id": "CUS-2120", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Bilbao", "method": "standard", "segment": "repeat_customer", "value": 29.9, "created_at": "2026-04-28T17:05:29Z", "status": "paid"}, {"order_id": "ORD-10497", "customer_id": "CUS-2082", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Madrid", "method": "standard", "segment": "loyal_customer", "value": 59.9, "created_at": "2026-04-28T17:05:58Z", "status": "paid"}, {"order_id": "ORD-10579", "customer_id": "CUS-2049", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Sevilla", "method": "express", "segment": "loyal_customer", "value": 39.9, "created_at": "2026-04-28T17:06:16Z", "status": "paid"}, {"order_id": "ORD-10555", "customer_id": "CUS-2001", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Palma", "method": "standard", "segment": "new_customer", "value": 69.8, "created_at": "2026-04-28T17:06:23Z", "status": "paid"}, {"order_id": "ORD-10434", "customer_id": "CUS-2065", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Sevilla", "method": "express", "segment": "new_customer", "value": 69.9, "created_at": "2026-04-28T17:06:29Z", "status": "paid"}, {"order_id": "ORD-10535", "customer_id": "CUS-2034", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Sevilla", "method": "standard", "segment": "vip_customer", "value": 79.8, "created_at": "2026-04-28T17:06:48Z", "status": "paid"}, {"order_id": "ORD-10480", "customer_id": "CUS-2047", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Madrid", "method": "express", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T17:07:40Z", "status": "paid"}, {"order_id": "ORD-10486", "customer_id": "CUS-2105", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 72.9, "created_at": "2026-04-28T17:08:10Z", "status": "paid"}, {"order_id": "ORD-10456", "customer_id": "CUS-2027", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 34.9, "created_at": "2026-04-28T17:08:46Z", "status": "packed"}, {"order_id": "ORD-10489", "customer_id": "CUS-2055", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Barcelona", "method": "standard", "segment": "at_risk_customer", "value": 79.9, "created_at": "2026-04-28T17:10:36Z", "status": "paid"}, {"order_id": "ORD-10426", "customer_id": "CUS-2058", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Madrid", "method": "express", "segment": "repeat_customer", "value": 59.9, "created_at": "2026-04-28T17:10:40Z", "status": "paid"}, {"order_id": "ORD-10521", "customer_id": "CUS-2021", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Murcia", "method": "standard", "segment": "at_risk_customer", "value": 69.9, "created_at": "2026-04-28T17:10:46Z", "status": "processing"}, {"order_id": "ORD-10449", "customer_id": "CUS-2104", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Barcelona", "method": "standard", "segment": "repeat_customer", "value": 69.9, "created_at": "2026-04-28T17:11:29Z", "status": "paid"}, {"order_id": "ORD-10552", "customer_id": "CUS-2062", "sku": "TEE-WHT-M", "product": "White Essential Tee", "city": "Barcelona", "method": "express", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T17:11:57Z", "status": "payment_review"}, {"order_id": "ORD-10551", "customer_id": "CUS-2002", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Bilbao", "method": "standard", "segment": "new_customer", "value": 64.9, "created_at": "2026-04-28T17:12:14Z", "status": "payment_review"}, {"order_id": "ORD-10538", "customer_id": "CUS-2096", "sku": "TEE-RED-M", "product": "Red Logo Tee", "city": "Zaragoza", "method": "standard", "segment": "new_customer", "value": 36.9, "created_at": "2026-04-28T17:14:18Z", "status": "paid"}, {"order_id": "ORD-10403", "customer_id": "CUS-2023", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 89.9, "created_at": "2026-04-28T17:14:28Z", "status": "paid"}, {"order_id": "ORD-10459", "customer_id": "CUS-2006", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T17:14:37Z", "status": "paid"}, {"order_id": "ORD-10576", "customer_id": "CUS-2109", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Valencia", "method": "standard", "segment": "repeat_customer", "value": 59.9, "created_at": "2026-04-28T17:15:13Z", "status": "processing"}, {"order_id": "ORD-10503", "customer_id": "CUS-2038", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T17:15:31Z", "status": "payment_review"}, {"order_id": "ORD-10406", "customer_id": "CUS-2047", "sku": "TEE-WHT-M", "product": "White Essential Tee", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T17:16:03Z", "status": "packed"}, {"order_id": "ORD-10571", "customer_id": "CUS-2002", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T17:16:25Z", "status": "paid"}, {"order_id": "ORD-10557", "customer_id": "CUS-2089", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T17:16:38Z", "status": "processing"}, {"order_id": "ORD-10428", "customer_id": "CUS-2076", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Sevilla", "method": "express", "segment": "repeat_customer", "value": 89.9, "created_at": "2026-04-28T17:17:21Z", "status": "packed"}, {"order_id": "ORD-10550", "customer_id": "CUS-2103", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Valencia", "method": "express", "segment": "new_customer", "value": 29.9, "created_at": "2026-04-28T17:18:01Z", "status": "packed"}, {"order_id": "ORD-10564", "customer_id": "CUS-2006", "sku": "HOODIE-BLK-L", "product": "Black Hoodie", "city": "Madrid", "method": "pickup_point", "segment": "new_customer", "value": 69.9, "created_at": "2026-04-28T17:18:53Z", "status": "paid"}, {"order_id": "ORD-10479", "customer_id": "CUS-2081", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Barcelona", "method": "standard", "segment": "repeat_customer", "value": 72.9, "created_at": "2026-04-28T17:18:56Z", "status": "paid"}, {"order_id": "ORD-10566", "customer_id": "CUS-2015", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Alicante", "method": "express", "segment": "loyal_customer", "value": 39.9, "created_at": "2026-04-28T17:19:15Z", "status": "processing"}, {"order_id": "ORD-10471", "customer_id": "CUS-2059", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Palma", "method": "standard", "segment": "new_customer", "value": 69.9, "created_at": "2026-04-28T17:19:24Z", "status": "packed"}, {"order_id": "ORD-10461", "customer_id": "CUS-2009", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Valencia", "method": "standard", "segment": "repeat_customer", "value": 64.9, "created_at": "2026-04-28T17:19:40Z", "status": "paid"}, {"order_id": "ORD-10532", "customer_id": "CUS-2007", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Palma", "method": "express", "segment": "loyal_customer", "value": 72.9, "created_at": "2026-04-28T17:22:14Z", "status": "paid"}, {"order_id": "ORD-10411", "customer_id": "CUS-2021", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Madrid", "method": "standard", "segment": "at_risk_customer", "value": 159.8, "created_at": "2026-04-28T17:22:30Z", "status": "processing"}, {"order_id": "ORD-10575", "customer_id": "CUS-2060", "sku": "TEE-BLK-L", "product": "Black Essential Tee", "city": "Barcelona", "method": "standard", "segment": "at_risk_customer", "value": 34.9, "created_at": "2026-04-28T17:22:38Z", "status": "paid"}, {"order_id": "ORD-10464", "customer_id": "CUS-2008", "sku": "SOCKS-WHT-OS", "product": "White Socks Pack", "city": "Madrid", "method": "express", "segment": "repeat_customer", "value": 14.9, "created_at": "2026-04-28T17:22:50Z", "status": "paid"}, {"order_id": "ORD-10491", "customer_id": "CUS-2007", "sku": "TEE-BLK-M", "product": "Black Essential Tee", "city": "Sevilla", "method": "standard", "segment": "loyal_customer", "value": 34.9, "created_at": "2026-04-28T17:23:05Z", "status": "paid"}, {"order_id": "ORD-10407", "customer_id": "CUS-2043", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Alicante", "method": "standard", "segment": "new_customer", "value": 69.9, "created_at": "2026-04-28T17:23:44Z", "status": "paid"}, {"order_id": "ORD-10577", "customer_id": "CUS-2018", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 59.9, "created_at": "2026-04-28T17:24:15Z", "status": "packed"}, {"order_id": "ORD-10573", "customer_id": "CUS-2013", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Palma", "method": "standard", "segment": "vip_customer", "value": 72.9, "created_at": "2026-04-28T17:25:41Z", "status": "paid"}, {"order_id": "ORD-10572", "customer_id": "CUS-2021", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Madrid", "method": "standard", "segment": "at_risk_customer", "value": 72.9, "created_at": "2026-04-28T17:25:51Z", "status": "paid"}, {"order_id": "ORD-10561", "customer_id": "CUS-2097", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Barcelona", "method": "express", "segment": "new_customer", "value": 59.9, "created_at": "2026-04-28T17:26:47Z", "status": "paid"}, {"order_id": "ORD-10510", "customer_id": "CUS-2119", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Barcelona", "method": "standard", "segment": "repeat_customer", "value": 59.8, "created_at": "2026-04-28T17:27:27Z", "status": "paid"}, {"order_id": "ORD-10446", "customer_id": "CUS-2089", "sku": "HOODIE-CRM-L", "product": "Cream Hoodie", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 72.9, "created_at": "2026-04-28T17:27:32Z", "status": "processing"}, {"order_id": "ORD-10438", "customer_id": "CUS-2117", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Sevilla", "method": "express", "segment": "at_risk_customer", "value": 59.9, "created_at": "2026-04-28T17:27:41Z", "status": "packed"}, {"order_id": "ORD-10441", "customer_id": "CUS-2082", "sku": "HOODIE-CRM-L", "product": "Cream Hoodie", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 72.9, "created_at": "2026-04-28T17:27:49Z", "status": "paid"}, {"order_id": "ORD-10544", "customer_id": "CUS-2077", "sku": "KNIT-NVY-L", "product": "Navy Knit Sweater", "city": "Sevilla", "method": "standard", "segment": "repeat_customer", "value": 89.9, "created_at": "2026-04-28T17:28:07Z", "status": "paid"}, {"order_id": "ORD-10481", "customer_id": "CUS-2087", "sku": "HOODIE-BLK-L", "product": "Black Hoodie", "city": "Barcelona", "method": "standard", "segment": "repeat_customer", "value": 69.9, "created_at": "2026-04-28T17:28:09Z", "status": "paid"}, {"order_id": "ORD-10472", "customer_id": "CUS-2062", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Palma", "method": "standard", "segment": "new_customer", "value": 69.8, "created_at": "2026-04-28T17:28:40Z", "status": "paid"}, {"order_id": "ORD-10417", "customer_id": "CUS-2070", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Malaga", "method": "express", "segment": "loyal_customer", "value": 34.9, "created_at": "2026-04-28T17:29:30Z", "status": "paid"}, {"order_id": "ORD-10447", "customer_id": "CUS-2018", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Murcia", "method": "standard", "segment": "new_customer", "value": 59.9, "created_at": "2026-04-28T17:29:35Z", "status": "processing"}, {"order_id": "ORD-10517", "customer_id": "CUS-2049", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Madrid", "method": "express", "segment": "loyal_customer", "value": 34.9, "created_at": "2026-04-28T17:29:36Z", "status": "paid"}, {"order_id": "ORD-10536", "customer_id": "CUS-2038", "sku": "TEE-WHT-S", "product": "White Essential Tee", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 34.9, "created_at": "2026-04-28T17:30:36Z", "status": "packed"}, {"order_id": "ORD-10444", "customer_id": "CUS-2025", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Bilbao", "method": "express", "segment": "new_customer", "value": 79.9, "created_at": "2026-04-28T17:31:11Z", "status": "paid"}, {"order_id": "ORD-10568", "customer_id": "CUS-2083", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Sevilla", "method": "standard", "segment": "new_customer", "value": 79.9, "created_at": "2026-04-28T17:31:21Z", "status": "paid"}, {"order_id": "ORD-10533", "customer_id": "CUS-2077", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Valencia", "method": "pickup_point", "segment": "repeat_customer", "value": 79.9, "created_at": "2026-04-28T17:31:45Z", "status": "paid"}, {"order_id": "ORD-10437", "customer_id": "CUS-2053", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Barcelona", "method": "express", "segment": "repeat_customer", "value": 59.9, "created_at": "2026-04-28T17:33:03Z", "status": "paid"}, {"order_id": "ORD-10520", "customer_id": "CUS-2034", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Madrid", "method": "standard", "segment": "vip_customer", "value": 89.9, "created_at": "2026-04-28T17:33:04Z", "status": "paid"}, {"order_id": "ORD-10543", "customer_id": "CUS-2022", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 179.8, "created_at": "2026-04-28T17:33:08Z", "status": "paid"}, {"order_id": "ORD-10541", "customer_id": "CUS-2052", "sku": "TEE-BLK-L", "product": "Black Essential Tee", "city": "Madrid", "method": "standard", "segment": "repeat_customer", "value": 34.9, "created_at": "2026-04-28T17:33:23Z", "status": "processing"}, {"order_id": "ORD-10473", "customer_id": "CUS-2076", "sku": "KNIT-NVY-L", "product": "Navy Knit Sweater", "city": "Bilbao", "method": "standard", "segment": "repeat_customer", "value": 89.9, "created_at": "2026-04-28T17:33:29Z", "status": "processing"}, {"order_id": "ORD-10513", "customer_id": "CUS-2021", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Madrid", "method": "express", "segment": "at_risk_customer", "value": 69.9, "created_at": "2026-04-28T17:34:03Z", "status": "packed"}, {"order_id": "ORD-10537", "customer_id": "CUS-2108", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Madrid", "method": "standard", "segment": "repeat_customer", "value": 39.9, "created_at": "2026-04-28T17:34:16Z", "status": "paid"}, {"order_id": "ORD-10416", "customer_id": "CUS-2050", "sku": "TEE-RED-M", "product": "Red Logo Tee", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 36.9, "created_at": "2026-04-28T17:35:01Z", "status": "paid"}, {"order_id": "ORD-10440", "customer_id": "CUS-2037", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Alicante", "method": "express", "segment": "new_customer", "value": 89.9, "created_at": "2026-04-28T17:35:30Z", "status": "paid"}, {"order_id": "ORD-10569", "customer_id": "CUS-2050", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Sevilla", "method": "express", "segment": "loyal_customer", "value": 39.9, "created_at": "2026-04-28T17:36:47Z", "status": "paid"}, {"order_id": "ORD-10483", "customer_id": "CUS-2091", "sku": "ZIP-BLK-L", "product": "Black Zip Hoodie", "city": "Madrid", "method": "standard", "segment": "new_customer", "value": 79.9, "created_at": "2026-04-28T17:37:14Z", "status": "paid"}, {"order_id": "ORD-10484", "customer_id": "CUS-2100", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Valencia", "method": "express", "segment": "repeat_customer", "value": 179.7, "created_at": "2026-04-28T17:37:46Z", "status": "paid"}, {"order_id": "ORD-10507", "customer_id": "CUS-2014", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Barcelona", "method": "standard", "segment": "loyal_customer", "value": 72.9, "created_at": "2026-04-28T17:38:13Z", "status": "paid"}, {"order_id": "ORD-10530", "customer_id": "CUS-2066", "sku": "ZIP-BLK-M", "product": "Black Zip Hoodie", "city": "Sevilla", "method": "standard", "segment": "new_customer", "value": 79.9, "created_at": "2026-04-28T17:39:54Z", "status": "paid"}, {"order_id": "ORD-10439", "customer_id": "CUS-2091", "sku": "HOODIE-CRM-M", "product": "Cream Hoodie", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 72.9, "created_at": "2026-04-28T17:41:46Z", "status": "paid"}, {"order_id": "ORD-10478", "customer_id": "CUS-2104", "sku": "SWEAT-GRY-M", "product": "Grey Sweatpants", "city": "Barcelona", "method": "standard", "segment": "repeat_customer", "value": 64.9, "created_at": "2026-04-28T17:42:10Z", "status": "processing"}, {"order_id": "ORD-10506", "customer_id": "CUS-2056", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Madrid", "method": "express", "segment": "repeat_customer", "value": 39.9, "created_at": "2026-04-28T17:42:25Z", "status": "paid"}, {"order_id": "ORD-10549", "customer_id": "CUS-2052", "sku": "KNIT-NVY-M", "product": "Navy Knit Sweater", "city": "Barcelona", "method": "express", "segment": "repeat_customer", "value": 89.9, "created_at": "2026-04-28T17:42:26Z", "status": "paid"}, {"order_id": "ORD-10501", "customer_id": "CUS-2050", "sku": "TEE-RED-L", "product": "Red Logo Tee", "city": "Palma", "method": "standard", "segment": "loyal_customer", "value": 36.9, "created_at": "2026-04-28T17:42:58Z", "status": "paid"}, {"order_id": "ORD-10485", "customer_id": "CUS-2045", "sku": "ZIP-BLK-L", "product": "Black Zip Hoodie", "city": "Zaragoza", "method": "standard", "segment": "vip_customer", "value": 79.9, "created_at": "2026-04-28T17:43:15Z", "status": "paid"}, {"order_id": "ORD-10405", "customer_id": "CUS-2042", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Palma", "method": "standard", "segment": "repeat_customer", "value": 29.9, "created_at": "2026-04-28T17:43:57Z", "status": "packed"}, {"order_id": "ORD-10462", "customer_id": "CUS-2069", "sku": "KNIT-NVY-L", "product": "Navy Knit Sweater", "city": "Malaga", "method": "express", "segment": "at_risk_customer", "value": 89.9, "created_at": "2026-04-28T17:43:58Z", "status": "paid"}, {"order_id": "ORD-10412", "customer_id": "CUS-2116", "sku": "JORTS-BLU-M", "product": "Blue Denim Jorts", "city": "Madrid", "method": "pickup_point", "segment": "repeat_customer", "value": 119.8, "created_at": "2026-04-28T17:44:28Z", "status": "processing"}, {"order_id": "ORD-10436", "customer_id": "CUS-2022", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Bilbao", "method": "standard", "segment": "loyal_customer", "value": 59.9, "created_at": "2026-04-28T17:45:43Z", "status": "paid"}, {"order_id": "ORD-10519", "customer_id": "CUS-2114", "sku": "TEE-BLK-L", "product": "Black Essential Tee", "city": "Barcelona", "method": "standard", "segment": "new_customer", "value": 69.8, "created_at": "2026-04-28T17:46:30Z", "status": "packed"}, {"order_id": "ORD-10451", "customer_id": "CUS-2049", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Zaragoza", "method": "standard", "segment": "loyal_customer", "value": 139.8, "created_at": "2026-04-28T17:50:22Z", "status": "paid"}, {"order_id": "ORD-10526", "customer_id": "CUS-2050", "sku": "CAP-BLK-OS", "product": "Black Cap", "city": "Zaragoza", "method": "standard", "segment": "loyal_customer", "value": 29.9, "created_at": "2026-04-28T17:51:00Z", "status": "packed"}, {"order_id": "ORD-10527", "customer_id": "CUS-2119", "sku": "HOODIE-BLK-M", "product": "Black Hoodie", "city": "Bilbao", "method": "express", "segment": "repeat_customer", "value": 69.9, "created_at": "2026-04-28T17:52:22Z", "status": "processing"}, {"order_id": "ORD-10523", "customer_id": "CUS-2115", "sku": "BAG-GRY-OS", "product": "Grey Shoulder Bag", "city": "Valencia", "method": "standard", "segment": "new_customer", "value": 39.9, "created_at": "2026-04-28T17:53:24Z", "status": "paid"}, {"order_id": "ORD-10545", "customer_id": "CUS-2085", "sku": "JORTS-BLU-L", "product": "Blue Denim Jorts", "city": "Sevilla", "method": "standard", "segment": "new_customer", "value": 59.9, "created_at": "2026-04-28T17:55:06Z", "status": "paid"}];
+  if (!Array.isArray(ORDERS) || ORDERS.length === 0) return;
+
+  const feed = document.getElementById('live-feed');
+  const dot = document.getElementById('live-dot');
+  const statusLabel = document.getElementById('live-status-label');
+  const countEl = document.getElementById('live-count');
+  const rateEl = document.getElementById('live-rate');
+  const revenueEl = document.getElementById('live-revenue');
+  const aovEl = document.getElementById('live-aov');
+  const topSkuEl = document.getElementById('live-top-sku');
+  const topCityEl = document.getElementById('live-top-city');
+  const connectBtn = document.getElementById('live-connect');
+  const pauseBtn = document.getElementById('live-pause');
+  const clearBtn = document.getElementById('live-clear');
+  const modal = document.getElementById('live-modal');
+  const webhookInput = document.getElementById('live-webhook');
+  const confirmBtn = document.getElementById('live-confirm');
+  const cancelBtn = document.getElementById('live-cancel');
+
+  let idx = 0;
+  let received = 0;
+  let revenue = 0;
+  let connected = false;
+  let paused = false;
+  let intervalId = null;
+  const recent = [];
+  const startTs = Date.now();
+  let liveFetchTimer = null;
+
+  function fmtTime(iso) {
+    if (!iso) return '--:--';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso.slice(11, 16);
+    return d.toISOString().slice(11, 16);
+  }
+
+  function isVipLike(seg) {
+    seg = (seg || '').toLowerCase();
+    return seg.indexOf('vip') >= 0 || seg.indexOf('loyal') >= 0;
+  }
+
+  function emit(order, opts) {
+    opts = opts || {};
+    const li = document.createElement('li');
+    li.className = 'new';
+    const segClass = isVipLike(order.segment) ? 'vip' : '';
+    const live = opts.live ? ' \u2022 live' : '';
+    li.innerHTML =
+      '<span class="time">' + fmtTime(order.created_at) + live + '</span>' +
+      '<span class="oid ' + segClass + '">' + (order.order_id || '') + '</span>' +
+      '<span class="sku">' + (order.sku || '') + '</span>' +
+      '<span>' + (order.product || '') + ' \u00b7 ' + (order.city || 's/d') + ' \u00b7 ' + (order.method || 'standard') + '</span>' +
+      '<span class="right">' + (order.value || 0).toFixed(2) + ' EUR</span>';
+    feed.insertBefore(li, feed.firstChild);
+    while (feed.children.length > 14) feed.removeChild(feed.lastChild);
+    setTimeout(function () { li.classList.remove('new'); }, 600);
+
+    received += 1;
+    revenue += Number(order.value) || 0;
+    recent.unshift(order);
+    if (recent.length > 12) recent.pop();
+    refreshStats();
+  }
+
+  function refreshStats() {
+    countEl.textContent = received;
+    revenueEl.textContent = revenue.toFixed(0) + ' EUR';
+    aovEl.textContent = received ? 'AOV ' + (revenue / received).toFixed(1) + ' EUR' : 'AOV 0 EUR';
+    const minutes = (Date.now() - startTs) / 60000;
+    rateEl.textContent = (received / Math.max(0.05, minutes)).toFixed(1) + ' pedidos/min';
+
+    if (recent.length === 0) {
+      topSkuEl.textContent = '-';
+      topCityEl.textContent = 'Ciudad: -';
+      return;
+    }
+    const skuCount = {};
+    const cityCount = {};
+    for (let i = 0; i < recent.length; i++) {
+      const r = recent[i];
+      if (r.sku) skuCount[r.sku] = (skuCount[r.sku] || 0) + 1;
+      if (r.city) cityCount[r.city] = (cityCount[r.city] || 0) + 1;
+    }
+    const topSku = Object.keys(skuCount).sort(function (a, b) { return skuCount[b] - skuCount[a]; })[0];
+    const topCity = Object.keys(cityCount).sort(function (a, b) { return cityCount[b] - cityCount[a]; })[0];
+    topSkuEl.textContent = topSku ? topSku + ' (' + skuCount[topSku] + ')' : '-';
+    topCityEl.textContent = 'Ciudad: ' + (topCity || '-');
+  }
+
+  function tick() {
+    if (paused) return;
+    const order = ORDERS[idx % ORDERS.length];
+    idx += 1;
+    emit(order, { live: connected });
+  }
+
+  function start(rateMs) {
+    stop();
+    intervalId = setInterval(tick, rateMs);
+  }
+
+  function stop() {
+    if (intervalId) clearInterval(intervalId);
+    intervalId = null;
+  }
+
+  function setStatus(connectedNow, label) {
+    connected = connectedNow;
+    if (connectedNow) {
+      dot.classList.add('online');
+      statusLabel.textContent = label || 'Conectado al feed en vivo';
+      connectBtn.textContent = 'Desconectar';
+    } else {
+      dot.classList.remove('online');
+      statusLabel.textContent = label || 'Modo simulacion offline';
+      connectBtn.textContent = 'Conectar feed en vivo';
+    }
+  }
+
+  function tryFetchLive(url) {
+    // Intento real: si el endpoint responde JSON con pedidos, los inyectamos.
+    // Si falla por CORS o 4xx/5xx, seguimos en modo simulacion.
+    if (!url || !url.match(/^https?:\/\//)) return;
+    if (liveFetchTimer) clearInterval(liveFetchTimer);
+    liveFetchTimer = setInterval(function () {
+      fetch(url, { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data) return;
+          const items = Array.isArray(data) ? data : (data.orders || data.items || []);
+          for (let i = 0; i < items.length; i++) {
+            const ev = items[i];
+            emit({
+              order_id: ev.order_id || ev.id || ('LIVE-' + Date.now()),
+              customer_id: ev.customer_id || '',
+              sku: ev.sku || (ev.line_items && ev.line_items[0] && ev.line_items[0].sku) || '',
+              product: ev.product || (ev.line_items && ev.line_items[0] && ev.line_items[0].title) || '',
+              city: ev.city || (ev.shipping_address && ev.shipping_address.city) || '',
+              method: ev.shipping_method || (ev.shipping_lines && ev.shipping_lines[0] && ev.shipping_lines[0].title) || 'standard',
+              segment: ev.segment || '',
+              value: Number(ev.value || ev.total_price || 0),
+              created_at: ev.created_at || new Date().toISOString(),
+              status: ev.financial_status || ev.status || ''
+            }, { live: true });
+          }
+        })
+        .catch(function () { /* silencioso, modo simulacion sigue */ });
+    }, 5000);
+  }
+
+  function stopFetchLive() {
+    if (liveFetchTimer) clearInterval(liveFetchTimer);
+    liveFetchTimer = null;
+  }
+
+  connectBtn.addEventListener('click', function () {
+    if (connected) {
+      stopFetchLive();
+      setStatus(false, 'Desconectado del feed en vivo');
+      start(2200);
+      return;
+    }
+    webhookInput.value = '';
+    modal.classList.add('open');
+  });
+
+  cancelBtn.addEventListener('click', function () { modal.classList.remove('open'); });
+
+  confirmBtn.addEventListener('click', function () {
+    const url = (webhookInput.value || '').trim();
+    modal.classList.remove('open');
+    setStatus(true, url ? 'Conectado: ' + url.replace(/^https?:\/\//, '').slice(0, 36) : 'Conectado (modo demo acelerado)');
+    start(800);
+    if (url) tryFetchLive(url);
+  });
+
+  pauseBtn.addEventListener('click', function () {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Reanudar' : 'Pausar';
+  });
+
+  clearBtn.addEventListener('click', function () {
+    feed.innerHTML = '';
+    received = 0;
+    revenue = 0;
+    recent.length = 0;
+    refreshStats();
+  });
+
+  // Arranque automatico en modo simulacion offline.
+  start(2200);
+})();
+</script>
+
+</body>
+</html>

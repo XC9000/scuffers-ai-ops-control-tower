@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Backups locales
+hackathon_control_tower_backup_*/
+
+# Outputs operativos (los regenera el script). Mantenemos solo el snapshot
+# de demo en docs/ para GitHub Pages.
+hackathon_control_tower/outputs/
+hackathon_control_tower/outputs_mock/
+hackathon_control_tower/outputs_full_api/
