@@ -83,6 +83,15 @@ body {
     text-decoration: none; line-height: 1; transition: background 0.15s ease, border-color 0.15s ease;
 }
 .btn-dark-mini:hover { background: var(--surface-soft); border-color: var(--ink-subtle); color: var(--ink); }
+.brand-logo-wrap { display: block; margin-bottom: var(--s-3); }
+.brand-logo-wrap img {
+    height: auto;
+    max-height: 36px;
+    width: auto;
+    max-width: 220px;
+    display: block;
+    object-fit: contain;
+}
 .brand-time { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-subtle); font-family: var(--font-mono); }
 .brand-pills { display: flex; gap: var(--s-2); flex-wrap: wrap; justify-content: flex-end; }
 .demo-banner {
@@ -314,7 +323,9 @@ main {
 <body>
 <header class="brand-header">
     <div class="brand-id">
-        <span class="brand-mark">Scuffers</span>
+        <div class="brand-logo-wrap">
+            <img src="https://images.teamtailor-cdn.com/images/s3/teamtailor-production/gallery_picture-v6/image_uploads/b6a6d00e-1b18-4f33-a535-d9558125695c/original.png" alt="Scuffers" loading="lazy" decoding="async" />
+        </div>
         <h1 class="brand-product">AI Ops Control Tower</h1>
         <span class="brand-tag">Las decisiones que hay que tomar mientras corre el drop.</span>
     </div>
