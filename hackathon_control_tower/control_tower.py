@@ -2194,7 +2194,12 @@ body {{
 .btn-dark-mini:hover {{ background: var(--surface-soft); border-color: var(--ink-subtle); color: var(--ink); }}
 .brand-logo-wrap {{ display: block; margin-bottom: var(--s-3); }}
 .brand-logo-wrap img {{
-    height: 22px; width: auto; display: block;
+    height: auto;
+    max-height: 36px;
+    width: auto;
+    max-width: 200px;
+    display: block;
+    object-fit: contain;
 }}
 .brand-time {{ font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-subtle); font-family: var(--font-mono); }}
 .brand-pills {{ display: flex; gap: var(--s-2); flex-wrap: wrap; justify-content: flex-end; }}
@@ -2428,7 +2433,7 @@ main {{
 <header class=\"brand-header\">
     <div class=\"brand-id\">
         <a href=\"https://www.scuffers.com/\" class=\"brand-logo-wrap\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"Scuffers\">
-            <img src=\"https://cdn.shopify.com/s/files/1/0035/9828/6912/files/logo.png\" alt=\"Scuffers\" width=\"120\" height=\"22\" loading=\"lazy\" decoding=\"async\" />
+            <img src=\"https://images.teamtailor-cdn.com/images/s3/teamtailor-production/gallery_picture-v6/image_uploads/b6a6d00e-1b18-4f33-a535-d9558125695c/original.png\" alt=\"Scuffers\" loading=\"lazy\" decoding=\"async\" />
         </a>
         <h1 class=\"brand-product\">AI Ops Control Tower</h1>
         <span class=\"brand-tag\">Las decisiones que hay que tomar mientras corre el drop.</span>
